@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a",
+                    "primary-fixed-dim": "#b0c6ff",
+                    "surface-tint": "#2b5bb5",
+                    "on-primary-fixed": "#001945",
+                    "error-container": "#ffdad6",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-fixed-dim": "#ffb4ac",
+                    "surface-container-high": "#e6e8eb",
+                    "on-secondary-fixed": "#261a00",
+                    "inverse-on-surface": "#eff1f4",
+                    "surface-bright": "#f7f9fc",
+                    "background": "#f7f9fc",
+                    "on-error": "#ffffff",
+                    "inverse-surface": "#2d3133",
+                    "on-secondary-fixed-variant": "#5b4300",
+                    "on-surface": "#191c1e",
+                    "surface-dim": "#d8dadd",
+                    "secondary-container": "#fdc003",
+                    "on-tertiary-fixed-variant": "#93000e",
+                    "outline-variant": "#c3c6d4",
+                    "inverse-primary": "#b0c6ff",
+                    "on-tertiary-fixed": "#410003",
+                    "surface-container-highest": "#e0e3e6",
+                    "primary": "#003178",
+                    "tertiary": "#720009",
+                    "tertiary-fixed": "#ffdad6",
+                    "surface-variant": "#e0e3e6",
+                    "on-background": "#191c1e",
+                    "on-secondary-container": "#6c5000",
+                    "on-primary": "#ffffff",
+                    "primary-container": "#0d47a1",
+                    "surface": "#f7f9fc",
+                    "on-primary-fixed-variant": "#00429c",
+                    "tertiary-container": "#9d0010",
+                    "error": "#ba1a1a",
+                    "secondary": "#785900",
+                    "on-tertiary-container": "#ffa59c",
+                    "secondary-fixed": "#ffdf9e",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "surface-container": "#eceef1",
+                    "on-primary-container": "#a1bbff",
+                    "secondary-fixed-dim": "#fabd00",
+                    "on-surface-variant": "#434652",
+                    "outline": "#737783",
+                    "primary-fixed": "#d9e2ff",
+                    "surface-container-low": "#f2f4f7",
+                    "crimson-accent": "#C62828"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "8px",
+                    "stack-md": "24px",
+                    "gutter": "16px",
+                    "stack-lg": "40px",
+                    "stack-sm": "12px",
+                    "container-padding": "20px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "h1": ["Space Grotesk"],
+                    "body-sm": ["Inter"],
+                    "h3": ["Space Grotesk"],
+                    "h2": ["Space Grotesk"]
+            },
+            "fontSize": {
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "h1": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                    "h3": ["20px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "h2": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .urgent-card {
+            border-left: 4px solid #C62828;
+        }
+        .fluid-ease {
+            transition: all 400s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md min-h-screen">
+<header class="bg-white/40 dark:bg-slate-950/40 backdrop-blur-xl text-blue-900 dark:text-blue-100 flex justify-between items-center w-full px-6 py-4 sticky top-0 z-50 border-b border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(13,71,161,0.1)]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-crimson-accent" data-icon="grid_view">grid_view</span>
+<h1 class="font-['Space_Grotesk'] font-black tracking-tighter text-blue-900 dark:text-blue-50 text-lg">Admin Command Center</h1>
+</div>
+<div class="relative">
+<div class="w-10 h-10 rounded-full border-2 border-crimson-accent overflow-hidden shadow-lg">
+<img class="w-full h-full object-cover" data-alt="A professional portrait of a senior campus administrator in a modern office environment. The lighting is bright and high-key, emphasizing a light-mode aesthetic with clean white surfaces. The subject is wearing a sharp navy blue suit that complements the institutional color palette. The overall mood is authoritative yet approachable, reflecting leadership in a tech-forward university setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNO7VpOQtnhIQ6MPeg28upUjkd7CaSlne8KhkJ6nhqs8z9fQXObfN0ZOhNeoInDbT1uAPzolU5wwmzQNGMTlIvLJoCQTKETVlOdt817DQU2t1_VzpakI93C5QwJ0NxyM4cfxgVPh2hROVb8Zjwv8UclEaG911dvUCZTsp1JvralbmaZEemP7rVgp3A3AjSlRLCfRSlg-ZpP_hsmA3ke_7fwbqVPecCi4dB8zxyMFghLy5bMzuoVwA5kBeTQ-WSIxHuJx6lx-erXWDR"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-crimson-accent text-white text-[8px] font-bold px-1 rounded-sm uppercase tracking-tighter shadow-sm">Admin</div>
+</div>
+</header>
+<main class="p-container-padding pb-32 max-w-2xl mx-auto space-y-stack-lg">
+<section class="grid grid-cols-3 gap-3">
+<div class="glass-card rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-[0_8px_32px_0_rgba(198,40,40,0.05)] border-b-2 border-b-crimson-accent/30">
+<span class="material-symbols-outlined text-crimson-accent mb-1" data-icon="assignment_late" style="font-variation-settings: 'FILL' 1;">assignment_late</span>
+<span class="font-h2 text-crimson-accent">12</span>
+<span class="font-label-caps text-on-surface-variant text-[10px]">Pending</span>
+</div>
+<div class="glass-card rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-sm border-b-2 border-b-secondary-container/50">
+<span class="material-symbols-outlined text-secondary mb-1" data-icon="pending" style="font-variation-settings: 'FILL' 1;">pending</span>
+<span class="font-h2 text-secondary">8</span>
+<span class="font-label-caps text-on-surface-variant text-[10px]">Active</span>
+</div>
+<div class="glass-card rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-sm border-b-2 border-b-emerald-500/30">
+<span class="material-symbols-outlined text-emerald-600 mb-1" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-h2 text-emerald-600">45</span>
+<span class="font-label-caps text-on-surface-variant text-[10px]">Fixed</span>
+</div>
+</section>
+<section class="space-y-stack-md">
+<div class="flex justify-between items-end">
+<h2 class="font-h2 text-primary">All Campus Complaints</h2>
+<span class="text-label-caps text-outline font-semibold">Sorted by Urgency</span>
+</div>
+<div class="space-y-4">
+<div class="glass-card urgent-card rounded-2xl p-4 flex items-center justify-between shadow-sm hover:bg-white/50 transition-all">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-crimson-accent/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-crimson-accent" data-icon="water_damage">water_damage</span>
+</div>
+<div>
+<h3 class="font-h3 text-primary text-base">Pipe Burst - Lab 402</h3>
+<div class="flex items-center gap-2 mt-1">
+<span class="bg-crimson-accent/10 text-crimson-accent px-2 py-0.5 rounded-full text-[10px] font-bold">URGENT</span>
+<span class="text-body-sm text-outline text-[12px]">2 mins ago</span>
+</div>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+</div>
+<div class="glass-card rounded-2xl p-4 flex items-center justify-between shadow-sm hover:bg-white/50 transition-all">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" data-icon="lightbulb">lightbulb</span>
+</div>
+<div>
+<h3 class="font-h3 text-primary text-base">Flickering Lights - Library</h3>
+<div class="flex items-center gap-2 mt-1">
+<span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded-full text-[10px] font-bold uppercase">Assigned</span>
+<span class="text-body-sm text-outline text-[12px]">1h ago</span>
+</div>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+</div>
+<div class="glass-card rounded-2xl p-4 flex items-center justify-between shadow-sm hover:bg-white/50 transition-all opacity-80">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-slate-200 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-500" data-icon="door_front">door_front</span>
+</div>
+<div>
+<h3 class="font-h3 text-primary text-base">Broken Handle - Gym</h3>
+<div class="flex items-center gap-2 mt-1">
+<span class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase">Pending Review</span>
+<span class="text-body-sm text-outline text-[12px]">3h ago</span>
+</div>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+</div>
+<div class="relative overflow-hidden rounded-3xl h-32 w-full group">
+<img class="w-full h-full object-cover grayscale-[20%] group-hover:scale-105 transition-transform duration-700" data-alt="A high-angle architectural photograph of a modern university courtyard during a bright, sunny day. The scene features clean geometric patterns in concrete and glass, reflecting a sophisticated institutional aesthetic. Deep crimson accents are visible in the distance on banners and seating areas, punctuating the crisp white and grey environment. The atmosphere is quiet and organized, emphasizing high-tech campus maintenance." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0b5kDaHQnjWFrVNUC0ABJtWP2-fBVPVcUDPVRrRzuBWVTlqVnnMXirPJIhguKDGJ-RYvAYofsCCeVUt6a5RnzOyupu8gdDGCDSK6V6fpUtT-60B2BAjGIZQcdojToHq8rqMnenFvzMBQ8RHEdLp6dCPPIWaH4_Ie4OlTCni274c_XnNd2xSJCY7vThT_sgR110mQOzexyLEJbDBkmhzxoKjfdcmrrAlDgXPu4XLX3s7pGY9NKeR2vgt0ZcXlt-NVFF_-FWEF8GMYR"/>
+<div class="absolute inset-0 bg-gradient-to-r from-primary/80 to-transparent flex items-center px-6">
+<div class="text-white">
+<p class="font-label-caps text-[10px] opacity-80">System Insight</p>
+<h4 class="font-h3 text-sm">Response times improved by 12% today</h4>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-6 left-0 right-0 mx-auto flex justify-around items-center px-4 py-3 z-50 max-w-md bg-white/30 dark:bg-slate-900/30 backdrop-blur-2xl rounded-3xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
+<a class="text-slate-600 dark:text-slate-400 flex flex-col items-center gap-1 hover:text-blue-700 dark:hover:text-blue-300 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-['Space_Grotesk'] font-semibold text-[10px] uppercase tracking-widest">Home</span>
+</a>
+<a class="bg-blue-600/20 dark:bg-blue-400/20 text-blue-900 dark:text-white rounded-2xl px-5 py-2 scale-110 transition-all flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined" data-icon="assignment_late" style="font-variation-settings: 'FILL' 1;">assignment_late</span>
+<span class="font-['Space_Grotesk'] font-semibold text-[10px] uppercase tracking-widest">Reports</span>
+</a>
+<a class="text-slate-600 dark:text-slate-400 flex flex-col items-center gap-1 hover:text-blue-700 dark:hover:text-blue-300 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+<span class="font-['Space_Grotesk'] font-semibold text-[10px] uppercase tracking-widest">Alerts</span>
+</a>
+<a class="text-slate-600 dark:text-slate-400 flex flex-col items-center gap-1 hover:text-blue-700 dark:hover:text-blue-300 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+<span class="font-['Space_Grotesk'] font-semibold text-[10px] uppercase tracking-widest">Profile</span>
+</a>
+</nav>
+<div class="fixed right-6 bottom-28 z-50">
+<button class="w-14 h-14 rounded-full bg-crimson-accent text-white shadow-[0_15px_30px_rgba(198,40,40,0.3)] flex items-center justify-center active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-2xl" data-icon="add_moderator" style="font-variation-settings: 'FILL' 1;">add_moderator</span>
+</button>
+</div>
+</body></html>

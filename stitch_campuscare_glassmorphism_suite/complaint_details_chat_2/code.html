@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Complaint Details - Campus Pulse</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#720009",
+                        "inverse-on-surface": "#eff1f4",
+                        "tertiary-container": "#9d0010",
+                        "on-primary-fixed-variant": "#00429c",
+                        "on-tertiary-fixed": "#410003",
+                        "on-primary-container": "#a1bbff",
+                        "surface-bright": "#f7f9fc",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#e0e3e6",
+                        "on-surface": "#191c1e",
+                        "on-secondary-container": "#6c5000",
+                        "tertiary-fixed": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#93000e",
+                        "surface": "#f7f9fc",
+                        "primary-fixed": "#d9e2ff",
+                        "tertiary-fixed-dim": "#ffb4ac",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "error-container": "#ffdad6",
+                        "background": "#f7f9fc",
+                        "surface-dim": "#d8dadd",
+                        "surface-container-high": "#e6e8eb",
+                        "secondary-container": "#fdc003",
+                        "on-surface-variant": "#434652",
+                        "error": "#ba1a1a",
+                        "primary-container": "#0d47a1",
+                        "on-secondary-fixed": "#261a00",
+                        "surface-container": "#eceef1",
+                        "outline-variant": "#c3c6d4",
+                        "on-primary-fixed": "#001945",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed-variant": "#5b4300",
+                        "surface-variant": "#e0e3e6",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-primary": "#b0c6ff",
+                        "secondary-fixed": "#ffdf9e",
+                        "inverse-surface": "#2d3133",
+                        "secondary-fixed-dim": "#fabd00",
+                        "outline": "#737783",
+                        "surface-container-low": "#f2f4f7",
+                        "primary-fixed-dim": "#b0c6ff",
+                        "primary": "#003178",
+                        "on-tertiary-container": "#ffa59c",
+                        "secondary": "#785900",
+                        "surface-tint": "#2b5bb5",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#191c1e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "12px",
+                        "stack-lg": "40px",
+                        "gutter": "16px",
+                        "container-padding": "20px",
+                        "stack-md": "24px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "h1": ["Space Grotesk"],
+                        "body-md": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "h3": ["Space Grotesk"],
+                        "h2": ["Space Grotesk"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "h1": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "h3": ["20px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "h2": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+        }
+        .light-leak-shadow {
+            box-shadow: 0 10px 40px -10px rgba(0, 49, 120, 0.1);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .chat-container {
+            height: calc(100vh - 480px);
+            min-height: 300px;
+        }
+        body {
+            background-color: #f7f9fc;
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface">
+<!-- TopAppBar -->
+<header class="bg-white/70 backdrop-blur-lg border-b border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.1)] docked full-width top-0 z-50 flex justify-between items-center px-4 h-16 w-full fixed">
+<div class="flex items-center gap-4">
+<button class="text-blue-900 transition-all active:scale-95 duration-200 hover:bg-white/30 p-2 rounded-full">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-space-grotesk font-bold text-lg text-blue-900">Complaint Details</h1>
+</div>
+<button class="text-blue-900 transition-all active:scale-95 duration-200 hover:bg-white/30 p-2 rounded-full">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</header>
+<main class="pt-20 pb-24 px-container-padding max-w-md mx-auto space-y-stack-md">
+<!-- Header Info Section -->
+<section class="glass-card rounded-xl p-5 space-y-3">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="font-h2 text-h2 text-primary leading-tight">Library Leak</h2>
+<p class="font-label-caps text-label-caps text-outline uppercase">ID #44921</p>
+</div>
+<span class="bg-secondary-container/20 text-on-secondary-container font-label-caps text-[10px] px-3 py-1 rounded-full border border-secondary-container/30">
+                    IN PROGRESS
+                </span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="calendar_today">calendar_today</span>
+<p class="font-body-sm text-body-sm">Filed on: Oct 12, 10:00 AM</p>
+</div>
+<!-- Admin Action -->
+<div class="pt-2">
+<button class="w-full bg-primary text-on-primary font-label-caps py-3 rounded-lg flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+                    CHANGE STATUS
+                </button>
+</div>
+</section>
+<!-- Content Section -->
+<section class="space-y-stack-sm">
+<div class="glass-card rounded-2xl overflow-hidden border border-white/20">
+<img class="w-full h-48 object-cover" data-alt="A detailed high-angle photograph showing severe water damage on a library ceiling with large dark moisture stains spreading across white tiles. Water droplets are caught mid-air falling into a professional yellow caution bucket placed on a carpeted floor. The lighting is clinical and bright, emphasizing the reflective puddles. The overall aesthetic is clean but urgent, using the institution's light-mode palette of soft greys and whites." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYbbpRsLgWtxUZnm3HMEP8CHEIHfscrWOqEI2xHOP8buwvdk2aYOcOvRi6qCCzB1mAiWU_eiesDvMd4KgI0BJ5H7RYCfAB1Vm18Da2OjOuDRL1YhHC3WHLYdl_X6KAc7bstEsy9Ps9-uCCNLWiHDT-smr2avk74yreYK5VYTTYdn34RR-gl58MBX7nBmQVzFcKaGCr8gLVCJx2xCEyzKcYtac5n73BFEqTG8F7V34zrIaBm5e0uGe7bonMwYXOdtn9zVPMx3qGkH-d"/>
+</div>
+<div class="glass-card rounded-xl p-5">
+<h3 class="font-h3 text-h3 text-primary mb-2">Description</h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                    There is a persistent water leak coming from the ceiling tiles directly above the main study clusters near computer lab 04. It started as a small drip but has escalated into a steady stream. Two computers are currently at risk.
+                </p>
+</div>
+</section>
+<!-- Chat Section -->
+<section class="glass-card rounded-xl p-5 flex flex-col space-y-4">
+<div class="flex items-center justify-between border-b border-outline-variant/30 pb-3">
+<h3 class="font-label-caps text-label-caps text-primary uppercase tracking-widest flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="forum">forum</span>
+                    DISCUSSION
+                </h3>
+<span class="text-[10px] font-body-sm text-outline">2 Messages</span>
+</div>
+<div class="chat-container overflow-y-auto space-y-4 pr-1">
+<!-- Student Message -->
+<div class="flex flex-col items-end">
+<div class="bg-primary-container text-on-primary-container p-4 rounded-t-2xl rounded-bl-2xl max-w-[85%] light-leak-shadow">
+<p class="font-body-md text-body-md">Any update on this? The leak seems to be getting worse and I'm worried about the equipment.</p>
+</div>
+<span class="text-[10px] font-body-sm text-outline mt-1 px-2">10:45 AM • Student</span>
+</div>
+<!-- Admin Reply -->
+<div class="flex flex-col items-start">
+<div class="bg-surface-container-highest/80 backdrop-blur-sm text-on-surface p-4 rounded-t-2xl rounded-br-2xl max-w-[85%] border border-white/40">
+<p class="font-body-md text-body-md">Plumber is on the way. Our facility team has been notified to cut power for safety. Thank you for the report.</p>
+</div>
+<span class="text-[10px] font-body-sm text-outline mt-1 px-2">11:02 AM • Facilities Admin</span>
+</div>
+</div>
+<!-- Input Area -->
+<div class="pt-2">
+<div class="flex items-center gap-2 bg-surface-container-low rounded-full px-4 py-2 border border-outline-variant/30">
+<button class="text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="attach_file">attach_file</span>
+</button>
+<input class="bg-transparent border-none focus:ring-0 w-full text-body-md font-body-md" placeholder="Type a message..." type="text"/>
+<button class="bg-secondary-container text-on-secondary-container w-10 h-10 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-all">
+<span class="material-symbols-outlined" data-icon="send" data-weight="fill" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="bg-white/70 backdrop-blur-lg fixed bottom-0 w-full z-50 rounded-t-2xl border-t border-white/20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] flex justify-around items-center h-20 pb-safe">
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-blue-900 transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-space-grotesk text-[10px] font-medium uppercase tracking-wider">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-yellow-600 bg-yellow-50/50 rounded-xl px-3 py-1 transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="assignment" data-weight="fill" style="font-variation-settings: 'FILL' 1;">assignment</span>
+<span class="font-space-grotesk text-[10px] font-medium uppercase tracking-wider">Reports</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-blue-900 transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="forum">forum</span>
+<span class="font-space-grotesk text-[10px] font-medium uppercase tracking-wider">Messages</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 hover:text-blue-900 transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-space-grotesk text-[10px] font-medium uppercase tracking-wider">Profile</span>
+</a>
+</nav>
+</body></html>

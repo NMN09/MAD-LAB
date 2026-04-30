@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a",
+                    "primary-fixed-dim": "#b0c6ff",
+                    "surface-tint": "#2b5bb5",
+                    "on-primary-fixed": "#001945",
+                    "error-container": "#ffdad6",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-fixed-dim": "#ffb4ac",
+                    "surface-container-high": "#e6e8eb",
+                    "on-secondary-fixed": "#261a00",
+                    "inverse-on-surface": "#eff1f4",
+                    "surface-bright": "#f7f9fc",
+                    "background": "#f7f9fc",
+                    "on-error": "#ffffff",
+                    "inverse-surface": "#2d3133",
+                    "on-secondary-fixed-variant": "#5b4300",
+                    "on-surface": "#191c1e",
+                    "surface-dim": "#d8dadd",
+                    "secondary-container": "#fdc003",
+                    "on-tertiary-fixed-variant": "#93000e",
+                    "outline-variant": "#c3c6d4",
+                    "inverse-primary": "#b0c6ff",
+                    "on-tertiary-fixed": "#410003",
+                    "surface-container-highest": "#e0e3e6",
+                    "primary": "#003178",
+                    "tertiary": "#720009",
+                    "tertiary-fixed": "#ffdad6",
+                    "surface-variant": "#e0e3e6",
+                    "on-background": "#191c1e",
+                    "on-secondary-container": "#6c5000",
+                    "on-primary": "#ffffff",
+                    "primary-container": "#0d47a1",
+                    "surface": "#f7f9fc",
+                    "on-primary-fixed-variant": "#00429c",
+                    "tertiary-container": "#9d0010",
+                    "error": "#ba1a1a",
+                    "secondary": "#785900",
+                    "on-tertiary-container": "#ffa59c",
+                    "secondary-fixed": "#ffdf9e",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "surface-container": "#eceef1",
+                    "on-primary-container": "#a1bbff",
+                    "secondary-fixed-dim": "#fabd00",
+                    "on-surface-variant": "#434652",
+                    "outline": "#737783",
+                    "primary-fixed": "#d9e2ff",
+                    "surface-container-low": "#f2f4f7"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "8px",
+                    "stack-md": "24px",
+                    "gutter": "16px",
+                    "stack-lg": "40px",
+                    "stack-sm": "12px",
+                    "container-padding": "20px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "h1": ["Space Grotesk"],
+                    "body-sm": ["Inter"],
+                    "h3": ["Space Grotesk"],
+                    "h2": ["Space Grotesk"]
+            },
+            "fontSize": {
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "h1": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                    "h3": ["20px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "h2": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .chat-container {
+            mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background font-body-md text-on-surface min-h-screen flex flex-col overflow-hidden">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-6 py-4 sticky top-0 z-50 bg-white/40 dark:bg-slate-950/40 backdrop-blur-xl border-b border-white/20 shadow-[0_8px_32px_0_rgba(13,71,161,0.1)]">
+<div class="flex items-center gap-4">
+<button class="hover:bg-white/30 transition-colors p-2 rounded-full active:scale-95 duration-200 ease-in-out">
+<span class="material-symbols-outlined text-blue-900" data-icon="close">close</span>
+</button>
+<h1 class="font-['Space_Grotesk'] font-bold text-lg tracking-tight text-blue-900">Library Leak</h1>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 bg-secondary-container text-on-secondary-container px-4 py-1.5 rounded-full font-label-caps text-label-caps shadow-sm">
+<span class="material-symbols-outlined text-[16px]" data-icon="edit">edit</span>
+                CHANGE STATUS
+            </button>
+</div>
+</header>
+<!-- Main Content Area (Scrollable Content + Chat) -->
+<main class="flex-1 overflow-y-auto pb-32">
+<!-- Content Section -->
+<section class="p-container-padding space-y-stack-md">
+<!-- Header Meta -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="bg-secondary-fixed text-on-secondary-fixed px-3 py-1 rounded-full font-label-caps text-[11px] tracking-widest uppercase font-bold">In Progress</span>
+<span class="text-outline font-body-sm text-body-sm">ID: #44921</span>
+</div>
+<div class="flex flex-wrap gap-x-4 gap-y-1 text-outline font-body-sm text-body-sm">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="calendar_today">calendar_today</span> Filed on: Oct 12, 10:00 AM</span>
+<span class="flex items-center gap-1 text-primary"><span class="material-symbols-outlined text-[14px]" data-icon="history">history</span> Updated: Just now</span>
+</div>
+</div>
+<!-- Evidence Image -->
+<div class="w-full aspect-video rounded-3xl overflow-hidden glass-card shadow-lg">
+<img class="w-full h-full object-cover" data-alt="A detailed wide-angle photograph of a university library ceiling showing significant water damage and a persistent drip near modern computer workstations. The lighting is cool-toned, filtering through large windows, creating a crisp, light-mode university atmosphere. The scene captures the texture of damp acoustic tiles and the reflective surface of the puddles forming on the polished floor. The overall mood is urgent yet professional, framed with a clean, institutional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvqbtrsLjtb5vBtls1Tu04FmR3fGvDTROr1qHfQQVXjexCBwIjalh3w7OzbNvcbaiO7Efd_Ny_tDc_4KRYAVuIPqBHa5128ueJysHSG0aSNHQDvyi6gp8fm_h9ZDCMYHw41qSXx05g7UT22Aetf-JA5jtMJhVJnkFcswDiNOcXIxd-azOFDMBtYIBN9G6hQjGkAtboWDvGxMRR1b8UWcD0yhu2VbMaiqd7i94pT4wdHhNm4yw2Ent9RPFKMWxCtMXBGS6Xp4lgPCvi"/>
+</div>
+<!-- Description Card -->
+<div class="glass-card p-6 rounded-3xl space-y-3">
+<h2 class="font-h2 text-h2 text-primary">Report Description</h2>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                    Water is dripping from the ceiling near the computer lab in the North Wing. It has started to soak the carpet and is dangerously close to the power outlets for the student laptops. We have placed a wastebasket underneath, but it's filling up quickly.
+                </p>
+<div class="flex items-center gap-2 pt-2 text-primary font-label-caps text-label-caps">
+<span class="material-symbols-outlined" data-icon="location_on">location_on</span>
+                    MAIN LIBRARY, 2ND FLOOR, COMPUTER LAB 04
+                </div>
+</div>
+<!-- Separator -->
+<div class="flex items-center gap-4 py-4">
+<div class="flex-1 h-[1px] bg-outline-variant"></div>
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-widest">Discussion</span>
+<div class="flex-1 h-[1px] bg-outline-variant"></div>
+</div>
+<!-- Chat Section -->
+<div class="space-y-6 px-2">
+<!-- User Bubble -->
+<div class="flex flex-col items-end gap-1 max-w-[85%] ml-auto">
+<div class="bg-primary text-on-primary px-5 py-3 rounded-2xl rounded-tr-none shadow-md">
+<p class="font-body-md text-body-md">Any update on this? The leak seems to be getting worse and I'm worried about the equipment.</p>
+</div>
+<span class="text-[10px] font-label-caps text-outline px-1">10:15 AM</span>
+</div>
+<!-- Admin Bubble -->
+<div class="flex flex-col items-start gap-1 max-w-[85%]">
+<div class="flex items-center gap-2 mb-1">
+<div class="w-6 h-6 rounded-full bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px] text-white" data-icon="person">person</span>
+</div>
+<span class="font-label-caps text-[11px] text-primary-container font-bold">ADMIN SERVICES</span>
+</div>
+<div class="bg-surface-container-high text-on-surface px-5 py-3 rounded-2xl rounded-tl-none shadow-sm border border-white/50">
+<p class="font-body-md text-body-md">Plumber is on the way. Our facility team has been notified to cut power to that section of the lab for safety. Thank you for the report.</p>
+</div>
+<span class="text-[10px] font-label-caps text-outline px-1">10:22 AM</span>
+</div>
+<!-- User Bubble -->
+<div class="flex flex-col items-end gap-1 max-w-[85%] ml-auto">
+<div class="bg-primary text-on-primary px-5 py-3 rounded-2xl rounded-tr-none shadow-md">
+<p class="font-body-md text-body-md">Thanks for the quick response. I've moved the chairs away from the area.</p>
+</div>
+<span class="text-[10px] font-label-caps text-outline px-1">10:25 AM</span>
+</div>
+<!-- Admin Bubble -->
+<div class="flex flex-col items-start gap-1 max-w-[85%]">
+<div class="flex items-center gap-2 mb-1">
+<div class="w-6 h-6 rounded-full bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px] text-white" data-icon="person">person</span>
+</div>
+<span class="font-label-caps text-[11px] text-primary-container font-bold">ADMIN SERVICES</span>
+</div>
+<div class="bg-surface-container-high text-on-surface px-5 py-3 rounded-2xl rounded-tl-none shadow-sm border border-white/50">
+<p class="font-body-md text-body-md">Maintenance is now on-site. The status will be updated once the initial repair is complete.</p>
+</div>
+<span class="text-[10px] font-label-caps text-outline px-1">Just now</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Sticky Input Section -->
+<div class="fixed bottom-0 left-0 right-0 p-container-padding bg-white/60 dark:bg-slate-900/60 backdrop-blur-3xl border-t border-white/20 z-50">
+<div class="max-w-4xl mx-auto flex items-center gap-3">
+<div class="flex-1 relative">
+<input class="w-full bg-surface-container-low border-none rounded-full px-6 py-4 font-body-md text-on-surface focus:ring-2 focus:ring-secondary-container placeholder:text-outline/60 transition-all shadow-inner" placeholder="Type a message..." type="text"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 hover:bg-surface-variant p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined text-outline" data-icon="attach_file">attach_file</span>
+</button>
+</div>
+<button class="w-14 h-14 bg-primary text-on-primary rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,49,120,0.3)] active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="send" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+</div>
+<!-- Background Decoration -->
+<div class="fixed top-0 left-0 -z-10 w-full h-full opacity-20 pointer-events-none">
+<div class="absolute top-[10%] left-[5%] w-[400px] h-[400px] bg-primary/10 blur-[100px] rounded-full"></div>
+<div class="absolute bottom-[20%] right-[10%] w-[300px] h-[300px] bg-secondary-container/10 blur-[100px] rounded-full"></div>
+</div>
+</body></html>

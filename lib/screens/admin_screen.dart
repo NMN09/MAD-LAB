@@ -1,292 +1,311 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../models/app_user.dart';
-import '../models/complaint.dart';
 import '../services/auth_service.dart';
-import '../services/db_service.dart';
+import 'chat_screen.dart';
 
-class AdminScreen extends StatelessWidget {
+class AdminScreen extends StatefulWidget {
+  @override
+  _AdminScreenState createState() => _AdminScreenState();
+}
+
+class _AdminScreenState extends State<AdminScreen> {
   final AuthService _auth = AuthService();
-  final DatabaseService _db = DatabaseService();
+  int _currentIndex = 0;
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'Resolved': return Colors.green[600]!;
-      case 'InProgress': return Colors.orange[600]!;
-      default: return Colors.blue[600]!;
-    }
-  }
+  final Color bgColor = const Color(0xFFF4F6F9); 
+  final Color pastelBlue = const Color(0xFFA3C4F3); 
+  final Color beige = const Color(0xFFF1E3D3); 
+  final Color textColor = const Color(0xFF2B3A4A);
 
-  void _showUpdateDialog(BuildContext context, Complaint comp) {
-    String newStatus = comp.status;
+  final List<Map<String, dynamic>> mockComplaints = [
+    {'title': 'Server Rack Overheating', 'category': 'IT Support', 'status': 'Pending', 'time': '2 hours ago'},
+    {'title': 'Security Breach Alert', 'category': 'Management', 'status': 'InProgress', 'time': '1 day ago'},
+    {'title': 'Perimeter Fence Damaged', 'category': 'Facilities', 'status': 'Resolved', 'time': 'Just now'},
+  ];
+
+  final List<Map<String, dynamic>> mockUsers = [
+    {'email': 'stu@bmsce.ac.in', 'role': 'user', 'department': 'None'},
+    {'email': 'admin_fac@bmsce.ac.in', 'role': 'admin', 'department': 'Facilities'},
+  ];
+
+  void _showSettingsSheet(AppUser? user) {
+    final bool isSuper = user?.role == 'superadmin';
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return Container(
-              padding: const EdgeInsets.all(28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                   Text('Update Status', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold)),
-                   const SizedBox(height: 10),
-                   Text('Complaint: ${comp.title}', style: TextStyle(color: Colors.grey[600])),
-                   const SizedBox(height: 25),
-                   DropdownButtonFormField<String>(
-                    value: newStatus,
-                    decoration: InputDecoration(
-                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                       labelText: 'Current Status',
-                    ),
-                    items: ['Submitted', 'InProgress', 'Resolved']
-                        .map((String value) => DropdownMenuItem(value: value, child: Text(value)))
-                        .toList(),
-                    onChanged: (String? newValue) => setDialogState(() => newStatus = newValue!),
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(40))),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(width: 48, height: 6, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10))),
+                const SizedBox(height: 24),
+                CircleAvatar(radius: 40, backgroundColor: isSuper ? beige : pastelBlue.withOpacity(0.3), child: Icon(isSuper ? Icons.shield : Icons.admin_panel_settings, size: 40, color: textColor)),
+                const SizedBox(height: 16),
+                Text(user?.email ?? 'admin@bmsce.ac.in', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: textColor)),
+                Text(isSuper ? 'Role: Super Admin' : 'Role: Facilities - Admin', style: GoogleFonts.inter(fontSize: 14, color: Colors.grey.shade600)),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity, height: 50,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(backgroundColor: textColor, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                    icon: const Icon(Icons.logout),
+                    label: const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold)),
+                    onPressed: () { Navigator.pop(context); Navigator.pop(context); },
                   ),
-                  const SizedBox(height: 30),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 55,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFC62828)),
-                      child: const Text('Update Complaint', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                      onPressed: () async {
-                        await _db.updateComplaintStatus(comp.id, newStatus);
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        ).animate().slideY(begin: 0.5, end: 0, curve: Curves.easeOutExpo, duration: 400.ms).fadeIn();
+      }
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<AppUser?>(context);
-    final isSuperAdmin = user?.isSuperAdmin ?? false;
-
-    if (isSuperAdmin) {
-      return DefaultTabController(
-        length: 2,
-        child: Scaffold(
-          backgroundColor: const Color(0xFFF9F9F9),
-          appBar: AppBar(
-            title: Text('Super Admin Console', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-            backgroundColor: const Color(0xFF1565C0), // Blue for Super Admin
-            foregroundColor: Colors.white,
-            elevation: 0,
-            bottom: const TabBar(
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.white70,
-              indicatorColor: Colors.white,
-              tabs: [
-                Tab(icon: Icon(Icons.report_problem), text: 'Complaints'),
-                Tab(icon: Icon(Icons.people), text: 'User Management'),
-              ],
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.logout_rounded),
-                onPressed: () async => await _auth.signOut(),
-              )
-            ],
-          ),
-          body: TabBarView(
-            children: [
-              _buildComplaintsView(),
-              _buildUsersView(),
-            ],
-          ),
-        ),
-      );
-    }
+    final bool isSuper = user?.role == 'superadmin';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9),
-      appBar: AppBar(
-        title: Text('Admin Console', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-        backgroundColor: const Color(0xFFC62828), // Deep Crimson for Admin
-        foregroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout_rounded),
-            onPressed: () async => await _auth.signOut(),
-          )
-        ],
-      ),
-      body: _buildComplaintsView(),
-    );
-  }
-
-  Widget _buildComplaintsView() {
-    return StreamBuilder<List<Complaint>>(
-      stream: _db.allComplaints,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) return Center(child: Text('Error: ${snapshot.error}'));
-        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-
-        List<Complaint> complaints = snapshot.data!;
-        
-        int pending = complaints.where((c) => c.status == 'Submitted').length;
-        int inProgress = complaints.where((c) => c.status == 'InProgress').length;
-        int resolved = complaints.where((c) => c.status == 'Resolved').length;
-
-        return Column(
+      backgroundColor: bgColor,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              color: const Color(0xFFC62828),
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+            Padding(
+              padding: const EdgeInsets.all(24.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildStatCard('Pending', pending.toString()),
-                  _buildStatCard('Active', inProgress.toString()),
-                  _buildStatCard('Fixed', resolved.toString()),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Welcome back,', style: GoogleFonts.inter(fontSize: 14, color: Colors.grey.shade600)),
+                      Text(isSuper ? 'Super Admin!' : 'Admin!', style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: textColor)),
+                    ],
+                  ),
+                  GestureDetector(
+                    onTap: () => _showSettingsSheet(user),
+                    child: CircleAvatar(radius: 24, backgroundColor: isSuper ? beige : pastelBlue.withOpacity(0.3), child: Icon(isSuper ? Icons.shield : Icons.admin_panel_settings, color: textColor)),
+                  )
                 ],
               ),
-            ),
+            ).animate().slideY(begin: -0.2, curve: Curves.easeOutCubic, duration: 600.ms).fadeIn(),
             
             Expanded(
-              child: complaints.isEmpty
-              ? Center(child: Text('No reports found', style: GoogleFonts.inter(color: Colors.grey)))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: complaints.length,
-                  itemBuilder: (context, index) {
-                    Complaint comp = complaints[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.all(12),
-                        leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: _buildImage(comp.imageUrl),
-                        ),
-                        title: Text(comp.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(comp.category, style: const TextStyle(fontSize: 12)),
-                            const SizedBox(height: 5),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: _getStatusColor(comp.status).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(comp.status, style: TextStyle(color: _getStatusColor(comp.status), fontSize: 10, fontWeight: FontWeight.bold)),
-                            ),
-                          ],
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.edit_note_rounded, color: Color(0xFFC62828)),
-                          onPressed: () => _showUpdateDialog(context, comp),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-            ),
+              child: _currentIndex == 0 ? _buildComplaintsView(isSuper) : _buildUserManagementView(),
+            )
           ],
-        );
-      },
+        ),
+      ),
+      floatingActionButtonLocation: isSuper ? FloatingActionButtonLocation.centerDocked : null,
+      floatingActionButton: isSuper ? Container(
+        margin: const EdgeInsets.only(bottom: 24, left: 24, right: 24),
+        height: 70,
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(35), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 10))]),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildNavItem(Icons.list_alt, 0, 'Complaints'),
+            _buildNavItem(Icons.people_alt, 1, 'Users'),
+          ],
+        ),
+      ).animate().slideY(begin: 1, delay: 400.ms, duration: 600.ms, curve: Curves.easeOutBack) : null,
     );
   }
 
-  Widget _buildUsersView() {
-    return StreamBuilder<List<AppUser>>(
-      stream: _db.allUsers,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) return Center(child: Text('Error: ${snapshot.error}'));
-        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-
-        List<AppUser> users = snapshot.data!;
-
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: users.length,
-          itemBuilder: (context, index) {
-            AppUser u = users[index];
-            bool isSuper = u.role == 'superadmin';
-            
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: isSuper ? const Color(0xFF1565C0) : (u.role == 'admin' ? const Color(0xFFC62828) : Colors.grey),
-                  child: const Icon(Icons.person, color: Colors.white),
-                ),
-                title: Text(u.email, style: const TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text('Current Role: ${u.role.toUpperCase()}'),
-                trailing: isSuper 
-                    ? const Text('SUPER ADMIN', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold))
-                    : DropdownButton<String>(
-                        value: u.role,
-                        items: ['user', 'admin'].map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value.toUpperCase()),
-                          );
-                        }).toList(),
-                        onChanged: (String? newValue) async {
-                          if (newValue != null && newValue != u.role) {
-                            await _db.updateUserRole(u.uid, newValue);
-                          }
-                        },
-                      ),
-              ),
-            );
-          },
-        );
-      },
+  Widget _buildNavItem(IconData icon, int index, String label) {
+    final isSelected = _currentIndex == index;
+    return GestureDetector(
+      onTap: () => setState(() => _currentIndex = index),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: isSelected ? pastelBlue : Colors.grey.shade400, size: 28),
+          const SizedBox(height: 2),
+          Text(label, style: TextStyle(color: isSelected ? pastelBlue : Colors.grey.shade400, fontSize: 10, fontWeight: FontWeight.bold)),
+        ],
+      ),
     );
   }
 
-  Widget _buildStatCard(String label, String value) {
+  Widget _buildComplaintsView(bool isSuper) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-        Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Row(
+            children: [
+              _buildStatCard('Pending', '12', Colors.orange),
+              const SizedBox(width: 12),
+              _buildStatCard('Active', '8', pastelBlue),
+              const SizedBox(width: 12),
+              _buildStatCard('Resolved', '45', Colors.green),
+            ],
+          ),
+        ).animate().scale(delay: 200.ms, duration: 500.ms, curve: Curves.easeOutBack),
+        const SizedBox(height: 24),
+        
+        if (isSuper)
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              children: [
+                _buildFilterChip('All', true),
+                _buildFilterChip('Facilities', false),
+                _buildFilterChip('IT Support', false),
+              ],
+            ),
+          ).animate().fadeIn(delay: 300.ms),
+        if (isSuper) const SizedBox(height: 16),
+        
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.only(left: 24, right: 24, bottom: 100),
+            itemCount: mockComplaints.length,
+            itemBuilder: (context, index) {
+              final item = mockComplaints[index];
+              return _buildComplaintCard(item, index);
+            },
+          ),
+        )
       ],
     );
   }
 
-  Widget _buildImage(String url) {
-    if (url.startsWith('data:')) {
-      // Decode Base64
-      try {
-        String base64Str = url.split(',').last;
-        return Image.memory(
-          base64Decode(base64Str),
-          width: 60,
-          height: 60,
-          fit: BoxFit.cover,
-        );
-      } catch (e) {
-        return const SizedBox(
-          width: 60,
-          height: 60,
-          child: Icon(Icons.broken_image, color: Colors.grey),
-        );
-      }
-    } else {
-      return Image.network(
-        url,
-        width: 60,
-        height: 60,
-        fit: BoxFit.cover,
-      );
-    }
+  Widget _buildUserManagementView() {
+    return ListView.builder(
+      padding: const EdgeInsets.only(left: 24, right: 24, bottom: 100),
+      itemCount: mockUsers.length,
+      itemBuilder: (context, index) {
+        final u = mockUsers[index];
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)]),
+          child: Row(
+            children: [
+              CircleAvatar(radius: 24, backgroundColor: beige, child: Icon(Icons.person, color: textColor)),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(u['email'], style: GoogleFonts.outfit(color: textColor, fontWeight: FontWeight.bold, fontSize: 16)),
+                    const SizedBox(height: 4),
+                    Text(u['role'] == 'admin' ? 'Role: ${u['department']} - Admin' : 'Role: Student', style: TextStyle(color: u['role'] == 'admin' ? pastelBlue : Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+              if (u['role'] == 'admin')
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                  decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(12)),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: u['department'],
+                      icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                      style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 12),
+                      items: ['None', 'Facilities', 'IT Support', 'Plumbing'].map((String value) {
+                        return DropdownMenuItem<String>(value: value, child: Text(value));
+                      }).toList(),
+                      onChanged: (_) {},
+                    ),
+                  ),
+                )
+            ],
+          ),
+        ).animate().slideX(begin: 0.1, delay: (100 * index).ms, duration: 500.ms, curve: Curves.easeOutExpo).fadeIn();
+      },
+    );
+  }
+
+  Widget _buildFilterChip(String label, bool isSelected) {
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: isSelected ? pastelBlue : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: isSelected ? null : Border.all(color: Colors.grey.shade300),
+      ),
+      child: Text(label, style: TextStyle(color: isSelected ? Colors.white : Colors.grey.shade600, fontWeight: FontWeight.bold, fontSize: 12)),
+    );
+  }
+
+  Widget _buildStatCard(String title, String count, Color color) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: color.withOpacity(0.3)), boxShadow: [BoxShadow(color: color.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4))]),
+        child: Column(
+          children: [
+            Text(count, style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: textColor)),
+            Text(title, style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildComplaintCard(Map<String, dynamic> item, int index) {
+    Color statusColor;
+    if (item['status'] == 'Resolved') statusColor = Colors.green;
+    else if (item['status'] == 'InProgress') statusColor = pastelBlue;
+    else statusColor = Colors.orange;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => ChatScreen(complaint: item)));
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)]),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Container(width: 60, height: 60, decoration: BoxDecoration(color: beige.withOpacity(0.5), borderRadius: BorderRadius.circular(12)), child: Icon(Icons.assignment, color: textColor.withOpacity(0.5))),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(child: Text(item['title'], style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: textColor), overflow: TextOverflow.ellipsis)),
+                        Text(item['time'], style: GoogleFonts.inter(fontSize: 12, color: Colors.grey.shade500)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(item['category'], style: GoogleFonts.inter(fontSize: 13, color: Colors.grey.shade600)),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                          child: Text(item['status'], style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.bold)),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    ).animate().slideX(begin: 0.1, delay: (100 * index + 400).ms, duration: 500.ms, curve: Curves.easeOutExpo).fadeIn();
   }
 }

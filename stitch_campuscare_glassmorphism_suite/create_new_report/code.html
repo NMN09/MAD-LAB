@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#e0e3e6",
+                        "on-secondary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "surface-bright": "#f7f9fc",
+                        "tertiary": "#720009",
+                        "on-error-container": "#93000a",
+                        "outline-variant": "#c3c6d4",
+                        "secondary-fixed": "#ffdf9e",
+                        "primary-container": "#0d47a1",
+                        "primary-fixed-dim": "#b0c6ff",
+                        "on-tertiary-container": "#ffa59c",
+                        "surface-container-high": "#e6e8eb",
+                        "on-surface-variant": "#434652",
+                        "tertiary-fixed": "#ffdad6",
+                        "surface": "#f7f9fc",
+                        "on-secondary-container": "#6c5000",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#5b4300",
+                        "on-tertiary-fixed": "#410003",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed-variant": "#00429c",
+                        "inverse-primary": "#b0c6ff",
+                        "inverse-on-surface": "#eff1f4",
+                        "secondary-fixed-dim": "#fabd00",
+                        "on-primary-container": "#a1bbff",
+                        "surface-dim": "#d8dadd",
+                        "on-secondary-fixed": "#261a00",
+                        "surface-tint": "#2b5bb5",
+                        "primary-fixed": "#d9e2ff",
+                        "tertiary-container": "#9d0010",
+                        "on-tertiary-fixed-variant": "#93000e",
+                        "background": "#f7f9fc",
+                        "on-background": "#191c1e",
+                        "outline": "#737783",
+                        "tertiary-fixed-dim": "#ffb4ac",
+                        "on-surface": "#191c1e",
+                        "on-tertiary": "#ffffff",
+                        "secondary-container": "#fdc003",
+                        "on-primary-fixed": "#001945",
+                        "surface-container-highest": "#e0e3e6",
+                        "error-container": "#ffdad6",
+                        "inverse-surface": "#2d3133",
+                        "primary": "#003178",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f2f4f7",
+                        "surface-container": "#eceef1",
+                        "secondary": "#785900"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "container-padding": "20px",
+                        "unit": "8px",
+                        "stack-lg": "40px",
+                        "stack-sm": "12px",
+                        "stack-md": "24px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "h2": ["Space Grotesk"],
+                        "h1": ["Space Grotesk"],
+                        "body-sm": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "h3": ["Space Grotesk"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "h2": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "h1": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "h3": ["20px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fluid-ease {
+            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-white/40 backdrop-blur-md border-b border-white/20 shadow-sm">
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-white/20 transition-all duration-300">
+<span class="material-symbols-outlined text-blue-900" data-icon="close">close</span>
+</button>
+<h1 class="text-lg font-black text-blue-900 uppercase tracking-widest font-['Space_Grotesk']">New Report</h1>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container overflow-hidden border border-white/40">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="A professional close-up portrait of a young male student in a bright, modern campus setting. He has a friendly expression, illuminated by soft natural sunlight filtering through architectural glass. The aesthetic is high-key and clean, matching a premium light-mode UI with soft blue and white tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsKwtXO7dcikh18qz6zqIyKtXupsWfPw0A3WtD5v2_00GQvyWDhwHZjo7Gf1gUsakNpsehMAWIWPuV2T7grX8xucwThLc6yzfWuSjmx1dBEbbdJ5yJOxOFa9PNE8OhfXW2JSDlO28drtbZuV-TaDUZg5rqp24E4kVfRlZ4KdcIxOdmQsqPzu_ZOR-LSqZFpFOQl9vWCtSQoX61E_E_gNzCAmY7erfrSw4rEyvSMd-hsts3MQSFxDiN-2apaXTcWROUziY4ifz83KOR"/>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-32 px-gutter max-w-2xl mx-auto space-y-stack-md">
+<!-- Welcome/Context Section -->
+<section class="space-y-unit">
+<h2 class="font-h1 text-h1 text-primary">Campus Pulse</h2>
+<p class="font-body-md text-on-surface-variant">Help us maintain our environment by reporting issues efficiently.</p>
+</section>
+<!-- Department Selection -->
+<section class="space-y-stack-sm overflow-hidden">
+<h3 class="font-label-caps text-label-caps uppercase text-outline px-1">Select Department</h3>
+<div class="flex gap-3 overflow-x-auto pb-4 no-scrollbar -mx-2 px-2">
+<button class="flex-shrink-0 px-6 py-3 rounded-full bg-primary text-white font-bold fluid-ease shadow-lg">
+                    Facilities
+                </button>
+<button class="flex-shrink-0 px-6 py-3 rounded-full glass-card text-on-surface-variant font-medium hover:bg-white/60 fluid-ease">
+                    Management
+                </button>
+<button class="flex-shrink-0 px-6 py-3 rounded-full glass-card text-on-surface-variant font-medium hover:bg-white/60 fluid-ease">
+                    Building
+                </button>
+<button class="flex-shrink-0 px-6 py-3 rounded-full glass-card text-on-surface-variant font-medium hover:bg-white/60 fluid-ease">
+                    IT Support
+                </button>
+<button class="flex-shrink-0 px-6 py-3 rounded-full glass-card text-on-surface-variant font-medium hover:bg-white/60 fluid-ease">
+                    Others
+                </button>
+</div>
+</section>
+<!-- Main Input Form Card -->
+<div class="glass-card rounded-[2rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.05)] space-y-stack-md">
+<!-- Title Input -->
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-outline ml-1">Report Title</label>
+<input class="w-full bg-surface-container-low border-transparent focus:border-secondary-container focus:ring-0 rounded-2xl p-4 text-body-md font-medium text-on-surface placeholder:text-outline-variant fluid-ease" placeholder="What's the issue?" type="text"/>
+</div>
+<!-- Description Input -->
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-outline ml-1">Detailed Description</label>
+<textarea class="w-full bg-surface-container-low border-transparent focus:border-secondary-container focus:ring-0 rounded-2xl p-4 text-body-md text-on-surface placeholder:text-outline-variant fluid-ease resize-none" placeholder="Provide more context for our team..." rows="4"></textarea>
+</div>
+<!-- Image Upload Placeholder -->
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-outline ml-1">Evidence / Photos</label>
+<div class="relative group">
+<div class="w-full aspect-video rounded-3xl border-2 border-dashed border-outline-variant flex flex-col items-center justify-center space-y-3 bg-white/10 hover:bg-white/30 transition-colors cursor-pointer overflow-hidden">
+<div class="bg-secondary-fixed text-on-secondary-fixed-variant p-3 rounded-full">
+<span class="material-symbols-outlined" data-icon="add_a_photo">add_a_photo</span>
+</div>
+<span class="font-body-sm font-semibold text-primary">Upload Campus Photo</span>
+<span class="text-[10px] text-outline uppercase tracking-widest">Max 10MB • JPG, PNG</span>
+</div>
+</div>
+</div>
+<!-- Urgency Level -->
+<div class="pt-4 flex items-center justify-between">
+<span class="font-body-md font-semibold text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-error" data-icon="priority_high">priority_high</span>
+                    Mark as Urgent
+                </span>
+<button class="w-12 h-6 rounded-full bg-surface-variant relative fluid-ease">
+<div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-300"></div>
+</button>
+</div>
+</div>
+<!-- Submit Button -->
+<button class="w-full py-5 rounded-full bg-primary text-white font-h3 text-h3 shadow-xl hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center gap-3">
+<span>Submit Report</span>
+<span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 bg-white/30 backdrop-blur-xl border border-white/30 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-full mx-4 mb-6 bottom-4" style="width: calc(100% - 2rem);">
+<a class="flex flex-col items-center justify-center text-slate-600 p-2 hover:scale-110 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-semibold uppercase tracking-tighter">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-blue-900 text-white rounded-full w-12 h-12 transition-transform duration-500 scale-110" href="#">
+<span class="material-symbols-outlined" data-icon="report_problem">report_problem</span>
+<span class="sr-only">Reports</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-600 p-2 hover:scale-110 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-semibold uppercase tracking-tighter">Inbox</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-600 p-2 hover:scale-110 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-semibold uppercase tracking-tighter">Settings</span>
+</a>
+</nav>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</body></html>
