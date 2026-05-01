@@ -201,6 +201,7 @@ class _ReportScreenState extends State<ReportScreen> {
                                 category: category,
                                 imageBase64: base64Image,
                                 userId: widget.userId,
+                                userEmail: '',
                               );
                               Navigator.pop(context); // Go back after success
                             } catch (e) {

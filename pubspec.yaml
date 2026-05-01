@@ -21,6 +21,7 @@ dependencies:
   intl: ^0.20.2
   google_fonts: ^6.1.0
   flutter_animate: ^4.5.2
+  timeago: ^3.7.1
 
 dev_dependencies:
   flutter_test:
