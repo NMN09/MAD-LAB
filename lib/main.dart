@@ -10,9 +10,15 @@ import 'screens/admin_screen.dart';
 import 'firebase_options.dart';
 import 'theme/app_colors.dart';
 
+import 'services/db_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  
+  // Retroactively heal any old complaints that have out-of-sync usernames
+  await DatabaseService().healAllComplaints();
+
   runApp(const MyApp());
 }
 

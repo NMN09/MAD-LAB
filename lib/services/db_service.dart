@@ -111,4 +111,35 @@ class DatabaseService {
   Future<void> updateUserRole(String uid, String role, {String department = ''}) async {
     await _db.collection('users').doc(uid).update({'role': role, 'department': department});
   }
+
+  // ===== DB HEALING =====
+  
+  Future<void> healAllComplaints() async {
+    final usersSnap = await _db.collection('users').get();
+    Map<String, String> userNames = {};
+    for (var doc in usersSnap.docs) {
+      userNames[doc.id] = doc.data()['name'] ?? '';
+    }
+    
+    final complaintsSnap = await _db.collection('complaints').get();
+    final batch = _db.batch();
+    int updates = 0;
+    
+    for (var doc in complaintsSnap.docs) {
+      final data = doc.data();
+      final uid = data['userId'] as String?;
+      if (uid != null && userNames.containsKey(uid)) {
+        final correctName = userNames[uid]!;
+        if (data['userName'] != correctName) {
+          batch.update(doc.reference, {'userName': correctName});
+          updates++;
+        }
+      }
+    }
+    
+    if (updates > 0) {
+      await batch.commit();
+      print('Healed $updates complaints with outdated usernames.');
+    }
+  }
 }

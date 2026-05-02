@@ -25,6 +25,22 @@ class _HomeScreenState extends State<HomeScreen> {
   final _db = DatabaseService();
   int _navIndex = 0;
   String _search = '';
+  final _searchC = TextEditingController();
+  
+  String? _cachedUid;
+  Stream<List<Complaint>>? _userComplaintsStream;
+  Stream<List<Complaint>>? _allComplaintsStream;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final user = Provider.of<AppUser?>(context);
+    if (user != null && _cachedUid != user.uid) {
+      _cachedUid = user.uid;
+      _userComplaintsStream = _db.userComplaints(user.uid);
+      _allComplaintsStream = _db.allComplaints;
+    }
+  }
 
   void _showSettings(AppUser user) {
     final nameC = TextEditingController(text: user.displayName);
@@ -57,13 +73,13 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
 
             _input(nameC, 'Full Name', 1), const SizedBox(height: 12),
-            _input(emailC, 'Email Address', 1), const SizedBox(height: 24),
+            _input(emailC, 'Email Address', 1, enabled: false), const SizedBox(height: 24),
 
             HoverColorButton(baseColor: AppColors.copper, hoverColor: Colors.orange, borderRadius: BorderRadius.circular(16), onTap: saving ? null : () async {
               ss(() { saving = true; errorMsg = null; successMsg = null; });
               try {
-                await _auth.updateProfile(nameC.text.trim(), emailC.text.trim());
-                ss(() { saving = false; successMsg = 'Profile updated successfully!'; });
+                final msg = await _auth.updateProfile(nameC.text.trim());
+                ss(() { saving = false; successMsg = msg; });
                 Future.delayed(const Duration(seconds: 1), () { if (ctx.mounted) Navigator.pop(ctx); });
               } catch (e) {
                 ss(() { saving = false; errorMsg = e.toString().replaceAll('Exception: ', ''); });
@@ -148,8 +164,8 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Widget _input(TextEditingController c, String hint, int lines) => TextField(controller: c, maxLines: lines, decoration: InputDecoration(
-    hintText: hint, filled: true, fillColor: AppColors.warmWhite, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none)));
+  Widget _input(TextEditingController c, String hint, int lines, {bool enabled = true}) => TextField(controller: c, maxLines: lines, enabled: enabled, decoration: InputDecoration(
+    hintText: hint, filled: true, fillColor: enabled ? AppColors.warmWhite : AppColors.beigeSoft.withOpacity(0.5), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none)));
 
   @override
   Widget build(BuildContext context) {
@@ -171,27 +187,35 @@ class _HomeScreenState extends State<HomeScreen> {
         Padding(padding: const EdgeInsets.symmetric(horizontal: 24), child: Container(
           height: 48, decoration: BoxDecoration(color: AppColors.warmWhite, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.beigeSoft)),
           child: Row(children: [const SizedBox(width: 14), const Icon(Icons.search, color: AppColors.textMuted, size: 22), const SizedBox(width: 10),
-            Expanded(child: TextField(onChanged: (v) => setState(() => _search = v), style: const TextStyle(color: AppColors.navy, fontSize: 14),
+            Expanded(child: TextField(controller: _searchC, onChanged: (v) => setState(() => _search = v), style: const TextStyle(color: AppColors.navy, fontSize: 14),
               decoration: InputDecoration(border: InputBorder.none, hintText: 'Search reports...', hintStyle: TextStyle(color: AppColors.textMuted.withOpacity(0.5)))))
           ]),
-        )).animate().fadeIn(delay: 150.ms),
+        )),
         const SizedBox(height: 12),
 
         Padding(padding: const EdgeInsets.symmetric(horizontal: 24), child: Text(_navIndex == 0 ? 'My Reports' : 'Community Reports', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.navy))).animate().fadeIn(delay: 200.ms),
         const SizedBox(height: 12),
 
         Expanded(child: StreamBuilder<List<Complaint>>(
-          stream: _navIndex == 0 ? _db.userComplaints(user.uid) : _db.allComplaints,
+          stream: _navIndex == 0 ? _userComplaintsStream : _allComplaintsStream,
           builder: (context, snap) {
             if (snap.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
             if (snap.hasError) return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.error_outline, size: 48, color: Colors.red.shade300), const SizedBox(height: 16), Text('Something went wrong.', style: GoogleFonts.inter(color: AppColors.textMuted))]));
             var list = snap.data ?? [];
             if (_search.isNotEmpty) list = list.where((c) => c.title.toLowerCase().contains(_search.toLowerCase()) || c.category.toLowerCase().contains(_search.toLowerCase())).toList();
-            if (list.isEmpty) return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Icon(Icons.inbox_rounded, size: 64, color: AppColors.beige), const SizedBox(height: 16),
-              Text(_navIndex == 0 ? 'No reports yet' : 'No community reports', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textMuted)),
-              const SizedBox(height: 4), Text(_navIndex == 0 ? 'Tap + to file your first report' : 'Check back later', style: GoogleFonts.inter(fontSize: 14, color: AppColors.textMuted)),
-            ]));
+            if (list.isEmpty) {
+              if (_search.isNotEmpty) {
+                return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  const Icon(Icons.search_off_rounded, size: 64, color: AppColors.beige), const SizedBox(height: 16),
+                  Text('No search results found', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textMuted)),
+                ]));
+              }
+              return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.inbox_rounded, size: 64, color: AppColors.beige), const SizedBox(height: 16),
+                Text(_navIndex == 0 ? 'No reports yet' : 'No community reports', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textMuted)),
+                const SizedBox(height: 4), Text(_navIndex == 0 ? 'Tap + to file your first report' : 'Check back later', style: GoogleFonts.inter(fontSize: 14, color: AppColors.textMuted)),
+              ]));
+            }
             return ListView.builder(padding: const EdgeInsets.only(left: 24, right: 24, top: 4, bottom: 120), itemCount: list.length,
               itemBuilder: (_, i) => _card(list[i], i, user));
           },

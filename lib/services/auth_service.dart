@@ -24,6 +24,12 @@ class AuthService {
               (doc) {
                 if (doc.exists) {
                   final data = doc.data() ?? {};
+                  
+                  // Auto-heal: If Firestore email differs from the real Auth email due to a past edit, fix it.
+                  if (user.email != null && data['email'] != user.email) {
+                    _db.collection('users').doc(user.uid).update({'email': user.email});
+                  }
+                  
                   controller.add(AppUser(uid: user.uid, email: user.email ?? '', name: data['name'] ?? '', role: data['role'] ?? 'user', department: data['department'] ?? ''));
                 } else {
                   _db.collection('users').doc(user.uid).set({'email': user.email, 'name': '', 'role': 'user', 'department': ''});
@@ -59,17 +65,26 @@ class AuthService {
     }
   }
 
-  Future<void> updateProfile(String name, String newEmail) async {
+  Future<String> updateProfile(String name) async {
     try {
       final user = _auth.currentUser;
       if (user != null) {
-        if (user.email != newEmail) {
-          // Note: In newer Firebase versions, updateEmail is removed.
-          // verifyBeforeUpdateEmail must be used, which requires email verification.
-          await user.verifyBeforeUpdateEmail(newEmail);
+        // 1. Update the user's profile
+        await _db.collection('users').doc(user.uid).update({'name': name});
+        
+        // 2. Cascade the name update to all of their past complaints
+        final complaintsQuery = await _db.collection('complaints').where('userId', isEqualTo: user.uid).get();
+        if (complaintsQuery.docs.isNotEmpty) {
+          final batch = _db.batch();
+          for (var doc in complaintsQuery.docs) {
+            batch.update(doc.reference, {'userName': name});
+          }
+          await batch.commit();
         }
-        await _db.collection('users').doc(user.uid).update({'name': name, 'email': newEmail});
+        
+        return 'Profile updated successfully!';
       }
+      return 'User not found.';
     } catch (e) {
       throw _friendlyError(e);
     }

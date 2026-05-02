@@ -25,10 +25,21 @@ class _AdminScreenState extends State<AdminScreen> {
   String _deptFilter = 'All';
   String? _statusFilter; // null = all, 'Submitted', 'InProgress', 'Resolved'
   String _search = '';
+  final _searchC = TextEditingController();
+  
+  Stream<List<Complaint>>? _allComplaintsStream;
+  Stream<List<AppUser>>? _allUsersStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _allComplaintsStream = _db.allComplaints;
+    _allUsersStream = _db.allUsers;
+  }
 
   final departments = ['All', 'Facilities', 'IT Support', 'Plumbing', 'Management', 'Others'];
 
-  Widget _input(TextEditingController c, String hint) => TextField(controller: c, decoration: InputDecoration(hintText: hint, filled: true, fillColor: AppColors.warmWhite, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none)));
+  Widget _input(TextEditingController c, String hint, {bool enabled = true}) => TextField(controller: c, enabled: enabled, decoration: InputDecoration(hintText: hint, filled: true, fillColor: enabled ? AppColors.warmWhite : AppColors.beigeSoft.withOpacity(0.5), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none)));
 
   void _showSettings(AppUser user) {
     final nameC = TextEditingController(text: user.displayName);
@@ -63,13 +74,13 @@ class _AdminScreenState extends State<AdminScreen> {
             ],
 
             _input(nameC, 'Full Name'), const SizedBox(height: 12),
-            _input(emailC, 'Email Address'), const SizedBox(height: 24),
+            _input(emailC, 'Email Address', enabled: false), const SizedBox(height: 24),
 
             HoverColorButton(baseColor: AppColors.copper, hoverColor: Colors.orange, borderRadius: BorderRadius.circular(16), onTap: saving ? null : () async {
               ss(() { saving = true; errorMsg = null; successMsg = null; });
               try {
-                await _auth.updateProfile(nameC.text.trim(), emailC.text.trim());
-                ss(() { saving = false; successMsg = 'Profile updated successfully!'; });
+                final msg = await _auth.updateProfile(nameC.text.trim());
+                ss(() { saving = false; successMsg = msg; });
                 Future.delayed(const Duration(seconds: 1), () { if (ctx.mounted) Navigator.pop(ctx); });
               } catch (e) {
                 ss(() { saving = false; errorMsg = e.toString().replaceAll('Exception: ', ''); });
@@ -121,7 +132,7 @@ class _AdminScreenState extends State<AdminScreen> {
   }
 
   Widget _complaintsView(AppUser user, bool isSuper) {
-    final stream = _db.allComplaints;
+    final stream = _allComplaintsStream;
     String? deptFilter;
     if (isSuper) { if (_deptFilter != 'All') deptFilter = _deptFilter; }
     else { if (user.department.isNotEmpty) deptFilter = user.department; }
@@ -174,7 +185,7 @@ class _AdminScreenState extends State<AdminScreen> {
           // Search
           Padding(padding: const EdgeInsets.symmetric(horizontal: 24), child: Container(height: 44, decoration: BoxDecoration(color: AppColors.warmWhite, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.beigeSoft)),
             child: Row(children: [const SizedBox(width: 14), const Icon(Icons.search, color: AppColors.textMuted, size: 20), const SizedBox(width: 10),
-              Expanded(child: TextField(onChanged: (v) => setState(() => _search = v), style: const TextStyle(color: AppColors.navy, fontSize: 13),
+              Expanded(child: TextField(controller: _searchC, onChanged: (v) => setState(() => _search = v), style: const TextStyle(color: AppColors.navy, fontSize: 13),
                 decoration: InputDecoration(border: InputBorder.none, hintText: 'Search complaints...', hintStyle: TextStyle(color: AppColors.textMuted.withOpacity(0.5)))))]))),
           const SizedBox(height: 12),
 
@@ -195,7 +206,11 @@ class _AdminScreenState extends State<AdminScreen> {
 
           // Complaint list
           Expanded(child: filtered.isEmpty
-            ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.inbox_rounded, size: 64, color: AppColors.beige), const SizedBox(height: 16), Text('No complaints found', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textMuted))]))
+            ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                Icon(_search.isNotEmpty ? Icons.search_off_rounded : Icons.inbox_rounded, size: 64, color: AppColors.beige), 
+                const SizedBox(height: 16), 
+                Text(_search.isNotEmpty ? 'No search results found' : 'No complaints found', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textMuted))
+              ]))
             : ListView.builder(padding: const EdgeInsets.only(left: 24, right: 24, bottom: 100), itemCount: filtered.length,
                 itemBuilder: (_, i) => _complaintCard(filtered[i], i))),
         ]);
@@ -319,7 +334,8 @@ class _AdminScreenState extends State<AdminScreen> {
 
   // ===== USER MANAGEMENT =====
   Widget _usersView() {
-    return StreamBuilder<List<AppUser>>(stream: _db.allUsers, builder: (context, snap) {
+    return StreamBuilder<List<AppUser>>(
+      stream: _allUsersStream, builder: (context, snap) {
       if (snap.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
       if (snap.hasError) return Center(child: Text('Error loading users.', style: GoogleFonts.inter(color: AppColors.textMuted)));
       final users = snap.data ?? [];
