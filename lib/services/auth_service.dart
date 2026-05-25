@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:google_sign_in/google_sign_in.dart';
 import '../models/app_user.dart';
 
 class AuthService {
@@ -29,11 +31,42 @@ class AuthService {
                   if (user.email != null && data['email'] != user.email) {
                     _db.collection('users').doc(user.uid).update({'email': user.email});
                   }
+
+                  // Auto-heal photoUrl
+                  if (user.photoURL != null && data['photoUrl'] != user.photoURL) {
+                    _db.collection('users').doc(user.uid).update({'photoUrl': user.photoURL});
+                  }
+
+                  // Auto-heal name
+                  if (user.displayName != null && (data['name'] == null || data['name'].isEmpty)) {
+                    _db.collection('users').doc(user.uid).update({'name': user.displayName});
+                  }
                   
-                  controller.add(AppUser(uid: user.uid, email: user.email ?? '', name: data['name'] ?? '', role: data['role'] ?? 'user', department: data['department'] ?? ''));
+                  controller.add(AppUser(
+                    uid: user.uid,
+                    email: user.email ?? '',
+                    name: data['name'] ?? user.displayName ?? '',
+                    role: data['role'] ?? 'user',
+                    department: data['department'] ?? '',
+                    photoUrl: data['photoUrl'] ?? user.photoURL ?? '',
+                  ));
                 } else {
-                  _db.collection('users').doc(user.uid).set({'email': user.email, 'name': '', 'role': 'user', 'department': ''});
-                  controller.add(AppUser(uid: user.uid, email: user.email ?? '', role: 'user'));
+                  final defaultName = user.displayName ?? '';
+                  final defaultPhoto = user.photoURL ?? '';
+                  _db.collection('users').doc(user.uid).set({
+                    'email': user.email,
+                    'name': defaultName,
+                    'role': 'user',
+                    'department': '',
+                    'photoUrl': defaultPhoto,
+                  });
+                  controller.add(AppUser(
+                    uid: user.uid,
+                    email: user.email ?? '',
+                    name: defaultName,
+                    role: 'user',
+                    photoUrl: defaultPhoto,
+                  ));
                 }
               },
               onError: (_) => controller.add(AppUser(uid: user.uid, email: user.email ?? '', role: 'user')),
@@ -46,12 +79,39 @@ class AuthService {
     return controller.stream;
   }
 
+  Future<void> signInWithGoogle() async {
+    try {
+      if (kIsWeb) {
+        final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        googleProvider.addScope('email');
+        googleProvider.addScope('profile');
+        await _auth.signInWithPopup(googleProvider);
+      } else {
+        final GoogleSignIn googleSignIn = GoogleSignIn();
+        final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+        if (googleUser == null) {
+          throw Exception('Google sign-in was cancelled.');
+        }
+        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+        final AuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+        await _auth.signInWithCredential(credential);
+      }
+    } catch (e, stack) {
+      print('Google sign in error: $e');
+      print(stack);
+      throw _friendlyError(e);
+    }
+  }
+
   Future<void> signInWithEmail(String email, String password) async {
     try {
-      final result = await _auth.signInWithEmailAndPassword(email: email.trim(), password: password.trim());
-      final doc = await _db.collection('users').doc(result.user!.uid).get();
-      if (!doc.exists) await _db.collection('users').doc(result.user!.uid).set({'email': email.trim(), 'name': '', 'role': 'user', 'department': ''});
-    } catch (e) {
+      await _auth.signInWithEmailAndPassword(email: email.trim(), password: password.trim());
+    } catch (e, stack) {
+      print('Sign in error: $e');
+      print(stack);
       throw _friendlyError(e);
     }
   }
@@ -60,7 +120,9 @@ class AuthService {
     try {
       final result = await _auth.createUserWithEmailAndPassword(email: email.trim(), password: password.trim());
       await _db.collection('users').doc(result.user!.uid).set({'email': email.trim(), 'name': name.trim(), 'role': 'user', 'department': ''});
-    } catch (e) {
+    } catch (e, stack) {
+      print('Register error: $e');
+      print(stack);
       throw _friendlyError(e);
     }
   }
@@ -91,6 +153,16 @@ class AuthService {
   }
 
   Future<void> signOut() async => await _auth.signOut();
+
+  Future<void> sendPasswordReset(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email.trim());
+    } catch (e, stack) {
+      print('Password reset error: $e');
+      print(stack);
+      throw _friendlyError(e);
+    }
+  }
 
   /// Converts raw Firebase errors into user-friendly messages
   String _friendlyError(dynamic e) {

@@ -57,7 +57,12 @@ class _HomeScreenState extends State<HomeScreen> {
           child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
             Container(width: 48, height: 6, decoration: BoxDecoration(color: AppColors.beige, borderRadius: BorderRadius.circular(10))),
             const SizedBox(height: 24),
-            CircleAvatar(radius: 40, backgroundColor: AppColors.pastelBlueSoft.withOpacity(0.4), child: const Icon(Icons.person, size: 40, color: AppColors.navy)),
+            CircleAvatar(
+              radius: 40,
+              backgroundColor: AppColors.pastelBlueSoft.withOpacity(0.4),
+              backgroundImage: user.photoUrl.isNotEmpty ? NetworkImage(user.photoUrl) : null,
+              child: user.photoUrl.isEmpty ? const Icon(Icons.person, size: 40, color: AppColors.navy) : null,
+            ),
             const SizedBox(height: 16),
             Text('Edit Profile', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.navy)),
             Text('Role: Student', style: GoogleFonts.inter(fontSize: 14, color: AppColors.textMuted)),
@@ -180,7 +185,15 @@ class _HomeScreenState extends State<HomeScreen> {
             Text('Welcome back,', style: GoogleFonts.inter(fontSize: 14, color: AppColors.textMuted)),
             Text(user.displayName, style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.navy)),
           ]),
-          HoverScale(onTap: () => _showSettings(user), child: CircleAvatar(radius: 24, backgroundColor: AppColors.pastelBlueSoft.withOpacity(0.4), child: const Icon(Icons.person, color: AppColors.navy))),
+          HoverScale(
+            onTap: () => _showSettings(user),
+            child: CircleAvatar(
+              radius: 24,
+              backgroundColor: AppColors.pastelBlueSoft.withOpacity(0.4),
+              backgroundImage: user.photoUrl.isNotEmpty ? NetworkImage(user.photoUrl) : null,
+              child: user.photoUrl.isEmpty ? const Icon(Icons.person, color: AppColors.navy) : null,
+            ),
+          ),
         ])).animate().slideY(begin: -0.2, curve: Curves.easeOutCubic, duration: 600.ms).fadeIn(),
 
         // Search bar
@@ -200,7 +213,14 @@ class _HomeScreenState extends State<HomeScreen> {
           stream: _navIndex == 0 ? _userComplaintsStream : _allComplaintsStream,
           builder: (context, snap) {
             if (snap.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
-            if (snap.hasError) return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.error_outline, size: 48, color: Colors.red.shade300), const SizedBox(height: 16), Text('Something went wrong.', style: GoogleFonts.inter(color: AppColors.textMuted))]));
+            if (snap.hasError) {
+              print('Firestore StreamBuilder error: ${snap.error}');
+              return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                Icon(Icons.error_outline, size: 48, color: Colors.red.shade300),
+                const SizedBox(height: 16),
+                Text('Something went wrong.\n${snap.error}', style: GoogleFonts.inter(color: AppColors.textMuted), textAlign: TextAlign.center)
+              ]));
+            }
             var list = snap.data ?? [];
             if (_search.isNotEmpty) list = list.where((c) => c.title.toLowerCase().contains(_search.toLowerCase()) || c.category.toLowerCase().contains(_search.toLowerCase())).toList();
             if (list.isEmpty) {

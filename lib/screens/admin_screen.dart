@@ -56,8 +56,12 @@ class _AdminScreenState extends State<AdminScreen> {
           child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
             Container(width: 48, height: 6, decoration: BoxDecoration(color: AppColors.beige, borderRadius: BorderRadius.circular(10))),
             const SizedBox(height: 24),
-            CircleAvatar(radius: 40, backgroundColor: user.isSuperAdmin ? AppColors.beigeSoft : AppColors.pastelBlueSoft.withOpacity(0.4),
-              child: Icon(user.isSuperAdmin ? Icons.shield : Icons.admin_panel_settings, size: 40, color: AppColors.navy)),
+            CircleAvatar(
+              radius: 40,
+              backgroundColor: user.isSuperAdmin ? AppColors.beigeSoft : AppColors.pastelBlueSoft.withOpacity(0.4),
+              backgroundImage: user.photoUrl.isNotEmpty ? NetworkImage(user.photoUrl) : null,
+              child: user.photoUrl.isEmpty ? Icon(user.isSuperAdmin ? Icons.shield : Icons.admin_panel_settings, size: 40, color: AppColors.navy) : null,
+            ),
             const SizedBox(height: 16),
             Text('Edit Profile', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.navy)),
             Text(user.isSuperAdmin ? 'Role: Super Admin' : 'Role: ${user.department.isNotEmpty ? user.department : 'General'} - Admin',
@@ -109,9 +113,15 @@ class _AdminScreenState extends State<AdminScreen> {
             Text('Welcome back,', style: GoogleFonts.inter(fontSize: 14, color: AppColors.textMuted)),
             Text(user.displayName, style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.navy)),
           ]),
-          HoverScale(onTap: () => _showSettings(user), child: CircleAvatar(radius: 24,
-            backgroundColor: isSuper ? AppColors.beigeSoft : AppColors.pastelBlueSoft.withOpacity(0.4),
-            child: Icon(isSuper ? Icons.shield : Icons.admin_panel_settings, color: AppColors.navy))),
+          HoverScale(
+            onTap: () => _showSettings(user),
+            child: CircleAvatar(
+              radius: 24,
+              backgroundColor: isSuper ? AppColors.beigeSoft : AppColors.pastelBlueSoft.withOpacity(0.4),
+              backgroundImage: user.photoUrl.isNotEmpty ? NetworkImage(user.photoUrl) : null,
+              child: user.photoUrl.isEmpty ? Icon(isSuper ? Icons.shield : Icons.admin_panel_settings, color: AppColors.navy) : null,
+            ),
+          ),
         ])).animate().slideY(begin: -0.2, curve: Curves.easeOutCubic, duration: 600.ms).fadeIn(),
         Expanded(child: _navIndex == 0 ? _complaintsView(user, isSuper) : _usersView()),
       ])),
@@ -141,10 +151,14 @@ class _AdminScreenState extends State<AdminScreen> {
       stream: stream,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
-        if (snap.hasError) return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(Icons.error_outline, size: 48, color: Colors.red.shade300), const SizedBox(height: 16),
-          Text('Something went wrong.', style: GoogleFonts.inter(color: AppColors.textMuted)),
-        ]));
+        if (snap.hasError) {
+          print('Firestore complaints stream error: ${snap.error}');
+          return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Icon(Icons.error_outline, size: 48, color: Colors.red.shade300),
+            const SizedBox(height: 16),
+            Text('Something went wrong.\n${snap.error}', style: GoogleFonts.inter(color: AppColors.textMuted), textAlign: TextAlign.center),
+          ]));
+        }
 
         var all = snap.data ?? [];
         if (deptFilter != null) all = all.where((c) => c.category == deptFilter).toList();
@@ -337,7 +351,10 @@ class _AdminScreenState extends State<AdminScreen> {
     return StreamBuilder<List<AppUser>>(
       stream: _allUsersStream, builder: (context, snap) {
       if (snap.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
-      if (snap.hasError) return Center(child: Text('Error loading users.', style: GoogleFonts.inter(color: AppColors.textMuted)));
+      if (snap.hasError) {
+        print('Firestore users stream error: ${snap.error}');
+        return Center(child: Text('Error loading users:\n${snap.error}', style: GoogleFonts.inter(color: AppColors.textMuted), textAlign: TextAlign.center));
+      }
       final users = snap.data ?? [];
       if (users.isEmpty) return Center(child: Text('No users found.', style: GoogleFonts.outfit(fontSize: 20, color: AppColors.textMuted)));
       return ListView.builder(padding: const EdgeInsets.only(left: 24, right: 24, bottom: 100), itemCount: users.length, itemBuilder: (_, i) => _userCard(users[i], i));
@@ -348,8 +365,12 @@ class _AdminScreenState extends State<AdminScreen> {
     return Container(margin: const EdgeInsets.only(bottom: 14), padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(color: AppColors.warmWhite, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.beigeSoft), boxShadow: [BoxShadow(color: AppColors.navy.withOpacity(0.03), blurRadius: 10)]),
       child: Row(children: [
-        CircleAvatar(radius: 24, backgroundColor: u.isAdmin ? AppColors.pastelBlueSoft.withOpacity(0.4) : AppColors.beigeSoft,
-          child: Icon(u.isSuperAdmin ? Icons.shield : u.isAdmin ? Icons.admin_panel_settings : Icons.person, color: AppColors.navy)),
+        CircleAvatar(
+          radius: 24,
+          backgroundColor: u.isAdmin ? AppColors.pastelBlueSoft.withOpacity(0.4) : AppColors.beigeSoft,
+          backgroundImage: u.photoUrl.isNotEmpty ? NetworkImage(u.photoUrl) : null,
+          child: u.photoUrl.isEmpty ? Icon(u.isSuperAdmin ? Icons.shield : u.isAdmin ? Icons.admin_panel_settings : Icons.person, color: AppColors.navy) : null,
+        ),
         const SizedBox(width: 16),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(u.email, style: GoogleFonts.outfit(color: AppColors.navy, fontWeight: FontWeight.bold, fontSize: 15), overflow: TextOverflow.ellipsis),

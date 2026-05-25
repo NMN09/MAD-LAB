@@ -104,7 +104,14 @@ class DatabaseService {
   Stream<List<AppUser>> get allUsers {
     return _db.collection('users').snapshots().map((s) => s.docs.map((d) {
       final data = d.data();
-      return AppUser(uid: d.id, email: data['email'] ?? '', name: data['name'] ?? '', role: data['role'] ?? 'user', department: data['department'] ?? '');
+      return AppUser(
+        uid: d.id,
+        email: data['email'] ?? '',
+        name: data['name'] ?? '',
+        role: data['role'] ?? 'user',
+        department: data['department'] ?? '',
+        photoUrl: data['photoUrl'] ?? '',
+      );
     }).toList());
   }
 

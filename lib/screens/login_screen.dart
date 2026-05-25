@@ -22,9 +22,24 @@ class _LoginScreenState extends State<LoginScreen> {
   String? error;
   Offset _mousePos = Offset.zero;
   bool _btnHover = false;
+  bool _googleHover = false;
 
   @override
   void dispose() { _emailC.dispose(); _passC.dispose(); _confirmC.dispose(); _nameC.dispose(); super.dispose(); }
+
+  Future<void> _loginWithGoogle() async {
+    setState(() { isLoading = true; error = null; });
+    try {
+      await _auth.signInWithGoogle();
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          error = e.toString().replaceAll('Exception: ', '');
+          isLoading = false;
+        });
+      }
+    }
+  }
 
   Future<void> _submit() async {
     final email = _emailC.text.trim(), pass = _passC.text.trim();
@@ -138,7 +153,49 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 28),
+                        const SizedBox(height: 16),
+                        Row(children: [
+                          Expanded(child: Divider(color: AppColors.beigeSoft, thickness: 1)),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text('OR', style: GoogleFonts.inter(fontSize: 12, color: AppColors.textMuted, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                          ),
+                          Expanded(child: Divider(color: AppColors.beigeSoft, thickness: 1)),
+                        ]),
+                        const SizedBox(height: 16),
+                        MouseRegion(
+                          onEnter: (_) => setState(() => _googleHover = true),
+                          onExit: (_) => setState(() => _googleHover = false),
+                          cursor: SystemMouseCursors.click,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            transform: _googleHover ? (Matrix4.identity()..translate(0.0, -3.0)) : Matrix4.identity(),
+                            width: double.infinity, height: 60,
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                backgroundColor: _googleHover ? AppColors.warmWhite : AppColors.cream.withOpacity(0.5),
+                                side: BorderSide(color: _googleHover ? AppColors.navy.withOpacity(0.3) : AppColors.beigeSoft, width: 1.5),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                elevation: _googleHover ? 4 : 0,
+                              ),
+                              onPressed: isLoading ? null : _loginWithGoogle,
+                              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                Image.network(
+                                  'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png',
+                                  height: 24,
+                                  width: 24,
+                                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.g_mobiledata, color: AppColors.navy, size: 28),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Continue with Google',
+                                  style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.navy),
+                                ),
+                              ]),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
                         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                           Text(isLogin ? "Don't have an account? " : "Already have an account? ", style: TextStyle(color: AppColors.textMuted, fontSize: 14)),
                           MouseRegion(
@@ -162,26 +219,175 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _forgotPassword() {
-    showDialog(context: context, builder: (ctx) => AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: Row(children: [
-        const Icon(Icons.info_outline, color: AppColors.copper),
-        const SizedBox(width: 8),
-        Text('Reset Password', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: AppColors.navy)),
-      ]),
-      content: Column(mainAxisSize: MainAxisSize.min, children: [
-        Text("Since this is a demo environment using dummy emails, password reset links cannot be received.", style: GoogleFonts.inter(fontSize: 14, color: AppColors.textMuted)),
-        const SizedBox(height: 12),
-        Text("If you forgot your password, please create a new account or ask a Super Admin for help.", style: GoogleFonts.inter(fontSize: 14, color: AppColors.textMuted, fontWeight: FontWeight.bold)),
-      ]),
-      actions: [
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: AppColors.navy, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-          onPressed: () => Navigator.pop(ctx),
-          child: const Text('Got it'),
-        ),
-      ],
-    ));
+    final resetEmailC = TextEditingController(text: _emailC.text.trim());
+    bool isResetLoading = false;
+    String? resetError;
+    String? resetSuccess;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            backgroundColor: AppColors.cream,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            title: Row(
+              children: [
+                const Icon(Icons.lock_reset_rounded, color: AppColors.copper, size: 28),
+                const SizedBox(width: 10),
+                Text(
+                  'Reset Password',
+                  style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: AppColors.navy, fontSize: 22),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Enter your email address and we'll send you a secure link to reset your password.",
+                  style: GoogleFonts.inter(fontSize: 14, color: AppColors.textMuted, height: 1.4),
+                ),
+                const SizedBox(height: 20),
+                if (resetError != null) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.red.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.error_outline, color: Colors.red.shade400, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            resetError!,
+                            style: TextStyle(color: Colors.red.shade700, fontSize: 13),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                if (resetSuccess != null) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.green.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.check_circle_outline_rounded, color: Colors.green.shade400, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            resetSuccess!,
+                            style: TextStyle(color: Colors.green.shade700, fontSize: 13),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                Container(
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: AppColors.warmWhite,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.beigeSoft),
+                  ),
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 16),
+                      const Icon(Icons.alternate_email_rounded, color: AppColors.textMuted, size: 20),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextField(
+                          controller: resetEmailC,
+                          enabled: !isResetLoading && resetSuccess == null,
+                          style: const TextStyle(color: AppColors.navy),
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Email Address',
+                            hintStyle: TextStyle(color: AppColors.textMuted.withOpacity(0.5)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: isResetLoading ? null : () => Navigator.pop(ctx),
+                child: Text(
+                  resetSuccess != null ? 'Close' : 'Cancel',
+                  style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: AppColors.textMuted),
+                ),
+              ),
+              if (resetSuccess == null)
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.navy,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  ),
+                  onPressed: isResetLoading
+                      ? null
+                      : () async {
+                          final email = resetEmailC.text.trim();
+                          if (email.isEmpty) {
+                            setDialogState(() => resetError = 'Please enter your email.');
+                            return;
+                          }
+                          if (!email.contains('@')) {
+                            setDialogState(() => resetError = 'Please enter a valid email.');
+                            return;
+                          }
+                          setDialogState(() {
+                            isResetLoading = true;
+                            resetError = null;
+                          });
+                          try {
+                            await _auth.sendPasswordReset(email);
+                            setDialogState(() {
+                              isResetLoading = false;
+                              resetSuccess = 'Password reset link sent to your email!';
+                            });
+                          } catch (e) {
+                            setDialogState(() {
+                              isResetLoading = false;
+                              resetError = e.toString().replaceAll('Exception: ', '');
+                            });
+                          }
+                        },
+                  child: isResetLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : Text(
+                          'Send Link',
+                          style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
+                        ),
+                ),
+            ],
+          );
+        },
+      ),
+    ).then((_) => resetEmailC.dispose());
   }
 
   Widget _field(TextEditingController ctrl, IconData icon, String hint, bool obscure) {

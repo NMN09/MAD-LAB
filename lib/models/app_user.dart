@@ -4,6 +4,7 @@ class AppUser {
   final String name;
   final String role; // 'user', 'admin', 'superadmin'
   final String department;
+  final String photoUrl;
 
   AppUser({
     required this.uid,
@@ -11,6 +12,7 @@ class AppUser {
     this.name = '',
     required this.role,
     this.department = '',
+    this.photoUrl = '',
   });
 
   bool get isAdmin => role == 'admin' || role == 'superadmin';

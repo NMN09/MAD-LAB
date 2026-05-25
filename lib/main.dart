@@ -17,7 +17,11 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   
   // Retroactively heal any old complaints that have out-of-sync usernames
-  await DatabaseService().healAllComplaints();
+  try {
+    await DatabaseService().healAllComplaints();
+  } catch (e) {
+    print('Failed to heal complaints on startup (expected if not authenticated): $e');
+  }
 
   runApp(const MyApp());
 }

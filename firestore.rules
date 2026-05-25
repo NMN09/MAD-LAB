@@ -1,0 +1,48 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to fetch the current user's document
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    // Check if the current user has an admin or superadmin role
+    function isAdmin() {
+      return isAuthenticated() && 
+        (getUserData().role == 'admin' || getUserData().role == 'superadmin');
+    }
+
+    // Users Collection rules
+    match /users/{userId} {
+      // Anyone logged in can read a user's details (needed to display names/departments on complaints)
+      allow read: if isAuthenticated();
+      
+      // Split write into create and update/delete to prevent non-existent document exceptions
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isAuthenticated() && (request.auth.uid == userId || getUserData().role == 'superadmin');
+      allow delete: if isAuthenticated() && getUserData().role == 'superadmin';
+    }
+
+    // Complaints Collection rules
+    match /complaints/{complaintId} {
+      // Any authenticated user can read or create complaints
+      allow read, create: if isAuthenticated();
+      
+      // Update/Delete complaints: owner of the complaint or an admin/superadmin
+      allow update: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      
+      // Chat Messages Subcollection rules
+      match /messages/{messageId} {
+        allow read, write: if isAuthenticated();
+      }
+    }
+  }
+}

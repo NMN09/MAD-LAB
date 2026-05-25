@@ -69,7 +69,10 @@ class _ComplaintDetailScreenState extends State<ComplaintDetailScreen> {
         stream: _db.complaintStream(widget.initialComplaint.id),
         initialData: widget.initialComplaint,
         builder: (context, snap) {
-          if (snap.hasError) return const Center(child: Text('Error loading details.'));
+          if (snap.hasError) {
+            print('Firestore complaint details error: ${snap.error}');
+            return Center(child: Text('Error loading details:\n${snap.error}', textAlign: TextAlign.center));
+          }
           final c = snap.data!;
 
           Color sc;
