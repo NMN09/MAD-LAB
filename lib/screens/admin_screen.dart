@@ -10,7 +10,7 @@ import '../services/db_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/hover_button.dart';
 import 'chat_screen.dart';
-import 'complaint_detail_screen.dart';
+import 'admin_filtered_complaints_screen.dart';
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
@@ -22,10 +22,6 @@ class _AdminScreenState extends State<AdminScreen> {
   final _auth = AuthService();
   final _db = DatabaseService();
   int _navIndex = 0;
-  String _deptFilter = 'All';
-  String? _statusFilter; // null = all, 'Submitted', 'InProgress', 'Resolved'
-  String _search = '';
-  final _searchC = TextEditingController();
   
   Stream<List<Complaint>>? _allComplaintsStream;
   Stream<List<AppUser>>? _allUsersStream;
@@ -37,8 +33,6 @@ class _AdminScreenState extends State<AdminScreen> {
     _allUsersStream = _db.allUsers;
   }
 
-  final departments = ['All', 'Facilities', 'IT Support', 'Plumbing', 'Management', 'Others'];
-
   Widget _input(TextEditingController c, String hint, {bool enabled = true}) => TextField(controller: c, enabled: enabled, decoration: InputDecoration(hintText: hint, filled: true, fillColor: enabled ? AppColors.warmWhite : AppColors.beigeSoft.withOpacity(0.5), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none)));
 
   void _showSettings(AppUser user) {
@@ -49,54 +43,52 @@ class _AdminScreenState extends State<AdminScreen> {
     String? successMsg;
 
     showModalBottomSheet(context: context, isScrollControlled: true, backgroundColor: Colors.transparent, builder: (ctx) {
-      return StatefulBuilder(builder: (context, ss) {
-        return Container(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 24, right: 24, top: 24),
-          decoration: BoxDecoration(color: AppColors.cream, borderRadius: const BorderRadius.vertical(top: Radius.circular(40))),
-          child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Container(width: 48, height: 6, decoration: BoxDecoration(color: AppColors.beige, borderRadius: BorderRadius.circular(10))),
-            const SizedBox(height: 24),
-            CircleAvatar(
-              radius: 40,
-              backgroundColor: user.isSuperAdmin ? AppColors.beigeSoft : AppColors.pastelBlueSoft.withOpacity(0.4),
-              backgroundImage: user.photoUrl.isNotEmpty ? NetworkImage(user.photoUrl) : null,
-              child: user.photoUrl.isEmpty ? Icon(user.isSuperAdmin ? Icons.shield : Icons.admin_panel_settings, size: 40, color: AppColors.navy) : null,
-            ),
-            const SizedBox(height: 16),
-            Text('Edit Profile', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.navy)),
-            Text(user.isSuperAdmin ? 'Role: Super Admin' : 'Role: ${user.department.isNotEmpty ? user.department : 'General'} - Admin',
-              style: GoogleFonts.inter(fontSize: 14, color: AppColors.textMuted)),
-            const SizedBox(height: 24),
+      return Container(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 24, right: 24, top: 24),
+        decoration: BoxDecoration(color: AppColors.cream, borderRadius: const BorderRadius.vertical(top: Radius.circular(40))),
+        child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Container(width: 48, height: 6, decoration: BoxDecoration(color: AppColors.beige, borderRadius: BorderRadius.circular(10))),
+          const SizedBox(height: 24),
+          CircleAvatar(
+            radius: 40,
+            backgroundColor: user.isSuperAdmin ? AppColors.beigeSoft : AppColors.pastelBlueSoft.withOpacity(0.4),
+            backgroundImage: user.photoUrl.isNotEmpty ? NetworkImage(user.photoUrl) : null,
+            child: user.photoUrl.isEmpty ? Icon(user.isSuperAdmin ? Icons.shield : Icons.admin_panel_settings, size: 40, color: AppColors.navy) : null,
+          ),
+          const SizedBox(height: 16),
+          Text('Edit Profile', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.navy)),
+          Text(user.isSuperAdmin ? 'Role: Super Admin' : 'Role: ${user.department.isNotEmpty ? user.department : 'General'} - Admin',
+            style: GoogleFonts.inter(fontSize: 14, color: AppColors.textMuted)),
+          const SizedBox(height: 24),
 
-            if (errorMsg != null) ...[
-              Text(errorMsg!, style: const TextStyle(color: Colors.red, fontSize: 13), textAlign: TextAlign.center),
-              const SizedBox(height: 12),
-            ],
-            if (successMsg != null) ...[
-              Text(successMsg!, style: const TextStyle(color: Colors.green, fontSize: 13), textAlign: TextAlign.center),
-              const SizedBox(height: 12),
-            ],
-
-            _input(nameC, 'Full Name'), const SizedBox(height: 12),
-            _input(emailC, 'Email Address', enabled: false), const SizedBox(height: 24),
-
-            HoverColorButton(baseColor: AppColors.copper, hoverColor: Colors.orange, borderRadius: BorderRadius.circular(16), onTap: saving ? null : () async {
-              ss(() { saving = true; errorMsg = null; successMsg = null; });
-              try {
-                final msg = await _auth.updateProfile(nameC.text.trim());
-                ss(() { saving = false; successMsg = msg; });
-                Future.delayed(const Duration(seconds: 1), () { if (ctx.mounted) Navigator.pop(ctx); });
-              } catch (e) {
-                ss(() { saving = false; errorMsg = e.toString().replaceAll('Exception: ', ''); });
-              }
-            }, child: SizedBox(width: double.infinity, height: 50, child: Center(child: saving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Text('Save Changes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16))))),
+          if (errorMsg != null) ...[
+            Text(errorMsg!, style: const TextStyle(color: Colors.red, fontSize: 13), textAlign: TextAlign.center),
             const SizedBox(height: 12),
-            HoverColorButton(baseColor: AppColors.navy, hoverColor: AppColors.navyLight, borderRadius: BorderRadius.circular(16), onTap: () async { Navigator.pop(ctx); await _auth.signOut(); },
-              child: const SizedBox(width: double.infinity, height: 50, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.logout, color: Colors.white), SizedBox(width: 8), Text('Logout', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16))]))),
-            const SizedBox(height: 24),
-          ])),
-        );
-      });
+          ],
+          if (successMsg != null) ...[
+            Text(successMsg!, style: const TextStyle(color: Colors.green, fontSize: 13), textAlign: TextAlign.center),
+            const SizedBox(height: 12),
+          ],
+
+          _input(nameC, 'Full Name'), const SizedBox(height: 12),
+          _input(emailC, 'Email Address', enabled: false), const SizedBox(height: 24),
+
+          HoverColorButton(baseColor: AppColors.copper, hoverColor: Colors.orange, borderRadius: BorderRadius.circular(16), onTap: saving ? null : () async {
+            setState(() { saving = true; errorMsg = null; successMsg = null; });
+            try {
+              final msg = await _auth.updateProfile(nameC.text.trim());
+              setState(() { saving = false; successMsg = msg; });
+              Future.delayed(const Duration(seconds: 1), () { if (ctx.mounted) Navigator.pop(ctx); });
+            } catch (e) {
+              setState(() { saving = false; errorMsg = e.toString().replaceAll('Exception: ', ''); });
+            }
+          }, child: SizedBox(width: double.infinity, height: 50, child: Center(child: saving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Text('Save Changes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16))))),
+          const SizedBox(height: 12),
+          HoverColorButton(baseColor: AppColors.navy, hoverColor: AppColors.navyLight, borderRadius: BorderRadius.circular(16), onTap: () async { Navigator.pop(ctx); await _auth.signOut(); },
+            child: const SizedBox(width: double.infinity, height: 50, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.logout, color: Colors.white), SizedBox(width: 8), Text('Logout', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16))]))),
+          const SizedBox(height: 24),
+        ])),
+      );
     }).whenComplete(() { nameC.dispose(); emailC.dispose(); });
   }
 
@@ -108,7 +100,7 @@ class _AdminScreenState extends State<AdminScreen> {
     return Scaffold(
       backgroundColor: AppColors.linen,
       body: SafeArea(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Padding(padding: const EdgeInsets.all(24), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('Welcome back,', style: GoogleFonts.inter(fontSize: 14, color: AppColors.textMuted)),
             Text(user.displayName, style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.navy)),
@@ -130,7 +122,7 @@ class _AdminScreenState extends State<AdminScreen> {
         margin: const EdgeInsets.only(bottom: 24, left: 24, right: 24), height: 70,
         decoration: BoxDecoration(color: AppColors.navy, borderRadius: BorderRadius.circular(35), boxShadow: [BoxShadow(color: AppColors.navy.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 8))]),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          _navItem(Icons.list_alt, 0, 'Complaints'), _navItem(Icons.people_alt, 1, 'Users'),
+          _navItem(Icons.dashboard_rounded, 0, 'Dashboard'), _navItem(Icons.people_alt, 1, 'Users'),
         ]),
       ).animate().slideY(begin: 1, delay: 400.ms, duration: 600.ms, curve: Curves.easeOutBack) : null,
     );
@@ -142,17 +134,13 @@ class _AdminScreenState extends State<AdminScreen> {
   }
 
   Widget _complaintsView(AppUser user, bool isSuper) {
-    final stream = _allComplaintsStream;
-    String? deptFilter;
-    if (isSuper) { if (_deptFilter != 'All') deptFilter = _deptFilter; }
-    else { if (user.department.isNotEmpty) deptFilter = user.department; }
-
+    final departments = ['Facilities', 'IT Support', 'Plumbing', 'Management', 'Others'];
+    
     return StreamBuilder<List<Complaint>>(
-      stream: stream,
+      stream: _allComplaintsStream,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
         if (snap.hasError) {
-          print('Firestore complaints stream error: ${snap.error}');
           return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
             Icon(Icons.error_outline, size: 48, color: Colors.red.shade300),
             const SizedBox(height: 16),
@@ -160,189 +148,329 @@ class _AdminScreenState extends State<AdminScreen> {
           ]));
         }
 
-        var all = snap.data ?? [];
-        if (deptFilter != null) all = all.where((c) => c.category == deptFilter).toList();
+        final all = snap.data ?? [];
 
-        final pending = all.where((c) => c.status == 'Submitted').length;
-        final active = all.where((c) => c.status == 'InProgress').length;
-        final resolved = all.where((c) => c.status == 'Resolved').length;
-        final cancelReq = all.where((c) => c.status == 'CancelRequested').length;
-        final cancelled = all.where((c) => c.status == 'Cancelled').length;
-
-        // Apply status filter from stat cards
-        var filtered = all;
-        if (_statusFilter == 'CancelRequested') filtered = all.where((c) => c.status == 'CancelRequested' || c.status == 'Cancelled').toList();
-        else if (_statusFilter != null) filtered = all.where((c) => c.status == _statusFilter).toList();
-        // Apply search
-        if (_search.isNotEmpty) filtered = filtered.where((c) => c.title.toLowerCase().contains(_search.toLowerCase()) || c.userEmail.toLowerCase().contains(_search.toLowerCase()) || c.category.toLowerCase().contains(_search.toLowerCase())).toList();
-
-        return Column(children: [
-          // Stat cards row 1
-          Padding(padding: const EdgeInsets.symmetric(horizontal: 24), child: Row(children: [
-            _statCard('Pending', '$pending', Colors.orange, 'Submitted'),
-            const SizedBox(width: 10),
-            _statCard('Active', '$active', AppColors.pastelBlue, 'InProgress'),
-            const SizedBox(width: 10),
-            _statCard('Resolved', '$resolved', Colors.green, 'Resolved'),
-          ])).animate().scale(delay: 200.ms, duration: 500.ms, curve: Curves.easeOutBack),
-          const SizedBox(height: 8),
-          // Stat cards row 2 - cancel
-          Padding(padding: const EdgeInsets.symmetric(horizontal: 24), child: Row(children: [
-            _statCard('Cancel Req', '$cancelReq', Colors.deepOrange, 'CancelRequested'),
-            const SizedBox(width: 10),
-            _statCard('Cancelled', '$cancelled', Colors.grey, 'Cancelled'),
-            const SizedBox(width: 10),
-            Expanded(child: Container()),
-          ])).animate().scale(delay: 250.ms, duration: 500.ms, curve: Curves.easeOutBack),
-          const SizedBox(height: 12),
-
-          // Search
-          Padding(padding: const EdgeInsets.symmetric(horizontal: 24), child: Container(height: 44, decoration: BoxDecoration(color: AppColors.warmWhite, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.beigeSoft)),
-            child: Row(children: [const SizedBox(width: 14), const Icon(Icons.search, color: AppColors.textMuted, size: 20), const SizedBox(width: 10),
-              Expanded(child: TextField(controller: _searchC, onChanged: (v) => setState(() => _search = v), style: const TextStyle(color: AppColors.navy, fontSize: 13),
-                decoration: InputDecoration(border: InputBorder.none, hintText: 'Search complaints...', hintStyle: TextStyle(color: AppColors.textMuted.withOpacity(0.5)))))]))),
-          const SizedBox(height: 12),
-
-          // Department chips (Super Admin)
-          if (isSuper) ...[
-            SingleChildScrollView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(children: departments.map((d) => Padding(padding: const EdgeInsets.only(right: 8),
-                child: HoverColorButton(
-                  baseColor: _deptFilter == d ? AppColors.pastelBlue : AppColors.warmWhite,
-                  hoverColor: _deptFilter == d ? AppColors.navyMuted : AppColors.pastelBlueSoft,
-                  borderRadius: BorderRadius.circular(20),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  onTap: () => setState(() { _deptFilter = d; if (d == 'All') _statusFilter = null; }),
-                  child: Text(d, style: TextStyle(color: _deptFilter == d ? Colors.white : AppColors.textMuted, fontWeight: FontWeight.bold, fontSize: 12)),
-                ))).toList())).animate().fadeIn(delay: 300.ms),
-            const SizedBox(height: 12),
-          ],
-
-          // Complaint list
-          Expanded(child: filtered.isEmpty
-            ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Icon(_search.isNotEmpty ? Icons.search_off_rounded : Icons.inbox_rounded, size: 64, color: AppColors.beige), 
-                const SizedBox(height: 16), 
-                Text(_search.isNotEmpty ? 'No search results found' : 'No complaints found', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textMuted))
-              ]))
-            : ListView.builder(padding: const EdgeInsets.only(left: 24, right: 24, bottom: 100), itemCount: filtered.length,
-                itemBuilder: (_, i) => _complaintCard(filtered[i], i))),
-        ]);
+        if (isSuper) {
+          // ==================== SUPER ADMIN VIEW (Mockup 2: Vertical Stack of Mockup 1) ====================
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Administrative View', style: GoogleFonts.inter(fontSize: 13, color: AppColors.textMuted, fontWeight: FontWeight.w500)),
+                    const SizedBox(height: 4),
+                    Text('System Overview', style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.navy)),
+                    // Underline indicator matching mockup
+                    Container(height: 3, width: 60, color: Colors.blue.shade800),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                
+                // Stack of department dashboards vertically
+                Column(
+                  children: departments.map((deptName) {
+                    return _buildDepartmentDashboardBlock(
+                      context: context,
+                      deptName: deptName,
+                      currentUser: user,
+                      allComplaints: all,
+                      showBorder: true,
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 100), // safe space for bottom floating bar
+              ],
+            ),
+          );
+        } else {
+          // ==================== DEPARTMENT ADMIN VIEW (Mockup 1: Single Department Dashboard) ====================
+          final dept = user.department;
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Administrative View', style: GoogleFonts.inter(fontSize: 13, color: AppColors.textMuted, fontWeight: FontWeight.w500)),
+                    const SizedBox(height: 2),
+                    Text('$dept Support', style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.navy)),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                _buildDepartmentDashboardBlock(
+                  context: context,
+                  deptName: dept,
+                  currentUser: user,
+                  allComplaints: all,
+                  showBorder: false,
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
+          );
+        }
       },
     );
   }
 
-  Widget _statCard(String title, String count, Color color, String statusKey) {
-    final isSelected = _statusFilter == statusKey;
-    return Expanded(child: HoverScale(
-      onTap: () => setState(() => _statusFilter = isSelected ? null : statusKey),
-      child: Container(padding: const EdgeInsets.all(14), decoration: BoxDecoration(
-        color: isSelected ? color.withOpacity(0.15) : AppColors.warmWhite,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: isSelected ? color : color.withOpacity(0.3), width: isSelected ? 2 : 1),
-        boxShadow: [BoxShadow(color: color.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4))]),
-        child: Column(children: [
-          Text(count, style: GoogleFonts.outfit(fontSize: 26, fontWeight: FontWeight.bold, color: AppColors.navy)),
-          Text(title, style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.bold)),
-          if (isSelected) Padding(padding: const EdgeInsets.only(top: 4), child: Text('✕ Clear', style: TextStyle(fontSize: 9, color: color))),
-        ])),
-    ));
+  // Unified Department Dashboard block that displays the premium metric cards and workload stats
+  Widget _buildDepartmentDashboardBlock({
+    required BuildContext context,
+    required String deptName,
+    required AppUser currentUser,
+    required List<Complaint> allComplaints,
+    bool showBorder = false,
+  }) {
+    final deptComplaints = allComplaints.where((c) => c.category == deptName).toList();
+
+    final active = deptComplaints.where((c) => c.status == 'Submitted' || c.status == 'InProgress').length;
+    final completed = deptComplaints.where((c) => c.status == 'Resolved').length;
+    final cancelReq = deptComplaints.where((c) => c.status == 'CancelRequested' || c.status == 'Cancelled').length;
+    final rejected = deptComplaints.where((c) => c.status == 'Rejected').length;
+    final total = active + completed + cancelReq + rejected;
+
+    // Compute metrics from actual data
+    final workloadPercent = total > 0 ? (active / total * 100).toStringAsFixed(0) : '0';
+    final resolutionPercent = total > 0 ? (completed / total * 100).toStringAsFixed(0) : '0';
+    final resolutionRateDouble = total > 0 ? (completed / total) : 0.0;
+
+    IconData deptIcon = Icons.corporate_fare_rounded;
+    if (deptName == 'IT Support') deptIcon = Icons.computer_rounded;
+    if (deptName == 'Plumbing') deptIcon = Icons.plumbing_rounded;
+    if (deptName == 'Facilities') deptIcon = Icons.handyman_rounded;
+    if (deptName == 'Management') deptIcon = Icons.gavel_rounded;
+
+    Widget dashboardContent = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Performance Metrics Outer Card
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppColors.warmWhite,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.beigeSoft, width: 1.5),
+            boxShadow: [BoxShadow(color: AppColors.navy.withOpacity(0.02), blurRadius: 10)],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Performance Metrics', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.navy)),
+                  const Icon(Icons.more_horiz, color: AppColors.textMuted),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Divider(color: AppColors.beigeSoft.withOpacity(0.5)),
+              const SizedBox(height: 12),
+              
+              // 4 Long Horizontal Rectangular Blocks
+              _adminHorizontalMetric(deptName, 'Active', active, Colors.blue.shade700, Colors.blue.shade50, Icons.bolt_rounded),
+              const SizedBox(height: 12),
+              _adminHorizontalMetric(deptName, 'Cancellation Requests', cancelReq, Colors.red.shade900, Colors.red.shade50, Icons.warning_rounded, customLabel: 'CANCELLING REQ'),
+              const SizedBox(height: 12),
+              _adminHorizontalMetric(deptName, 'Completed', completed, Colors.brown.shade800, Colors.orange.shade50, Icons.check_circle_rounded, customLabel: 'RESOLVED'),
+              const SizedBox(height: 12),
+              _adminHorizontalMetric(deptName, 'Rejected', rejected, Colors.grey.shade700, Colors.grey.shade100, Icons.cancel_rounded),
+            ],
+          ),
+        ),
+        
+        const SizedBox(height: 16),
+        
+        // Two Capacity Cards at the bottom (Workload Ratio + Resolution Rate)
+        Row(
+          children: [
+            // Card 1: Workload Ratio
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.warmWhite,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.beigeSoft, width: 1.5),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Workload Ratio', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textMuted)),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: total > 0 ? (active / total) : 0.0,
+                        backgroundColor: Colors.grey.shade200,
+                        color: Colors.blue.shade800,
+                        minHeight: 6,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text('$workloadPercent% Active', style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.navy)),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            // Card 2: Resolution Rate
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.warmWhite,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.beigeSoft, width: 1.5),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Resolution Rate', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textMuted)),
+                    const SizedBox(height: 6),
+                    Text('$resolutionPercent%', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.navy)),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Icon(Icons.arrow_upward_rounded, color: Colors.brown.shade800, size: 12),
+                        const SizedBox(width: 2),
+                        Text(
+                          resolutionRateDouble > 0.5 ? '↑ Stable Rate' : 'Needs attention',
+                          style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.brown.shade800),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    if (showBorder) {
+      // Super Admin department card wrapped in a beautiful bold contrasted navy border
+      return Container(
+        margin: const EdgeInsets.only(bottom: 32),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.linen.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(color: AppColors.navy, width: 2.0), // bold contrasted border
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.navy.withOpacity(0.06),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            )
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Prominent Header row for the department
+            Row(
+              children: [
+                Icon(deptIcon, color: AppColors.copper, size: 24),
+                const SizedBox(width: 10),
+                Text(
+                  deptName,
+                  style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.navy),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.navy.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '$total Cases',
+                    style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.navy),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            dashboardContent,
+          ],
+        ),
+      ).animate().slideY(begin: 0.1, duration: 400.ms, curve: Curves.easeOutCubic).fadeIn();
+    }
+
+    return dashboardContent;
   }
 
-  Widget _complaintCard(Complaint item, int i) {
-    Color sc;
-    if (item.status == 'Resolved') sc = Colors.green;
-    else if (item.status == 'InProgress') sc = AppColors.pastelBlue;
-    else if (item.status == 'Rejected') sc = Colors.red;
-    else if (item.status == 'CancelRequested') sc = Colors.deepOrange;
-    else if (item.status == 'Cancelled') sc = Colors.grey;
-    else sc = Colors.orange;
-    final statusLabel = item.status == 'CancelRequested' ? 'Cancel Req' : item.status;
+  // Long horizontal rectangle for Admin & Super Admin parameter rows
+  Widget _adminHorizontalMetric(
+    String dept, 
+    String paramName, 
+    int count, 
+    Color stripeColor, 
+    Color badgeBgColor, 
+    IconData icon, 
+    {String? customLabel}
+  ) {
+    final String label = customLabel ?? paramName.toUpperCase();
+    
     return HoverScale(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ComplaintDetailScreen(initialComplaint: item))),
-      onLongPress: () => _showActions(item),
-      child: Container(margin: const EdgeInsets.only(bottom: 14), decoration: BoxDecoration(color: AppColors.warmWhite, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.beigeSoft),
-        boxShadow: [BoxShadow(color: AppColors.navy.withOpacity(0.03), blurRadius: 10)]),
-        child: Padding(padding: const EdgeInsets.all(14), child: Row(children: [
-          Container(width: 56, height: 56, decoration: BoxDecoration(color: AppColors.beigeSoft, borderRadius: BorderRadius.circular(12)), child: Center(child: Text(item.category.isNotEmpty ? item.category[0].toUpperCase() : '?', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.navy)))),
-          const SizedBox(width: 14),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Expanded(child: Text(item.title, style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.navy), overflow: TextOverflow.ellipsis)),
-              Text(timeago.format(item.timestamp), style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted)),
-            ]),
-            const SizedBox(height: 2),
-            Text('by ${item.userName.isNotEmpty ? item.userName : (item.userEmail.isNotEmpty ? item.userEmail : 'Unknown')}', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted)),
-            const SizedBox(height: 6),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Row(children: [
-                Text(item.category, style: GoogleFonts.inter(fontSize: 12, color: AppColors.textMuted)),
-                if (item.upvoteCount > 0) ...[const SizedBox(width: 8), Icon(Icons.thumb_up, size: 12, color: AppColors.pastelBlue), const SizedBox(width: 3), Text('${item.upvoteCount}', style: TextStyle(fontSize: 11, color: AppColors.pastelBlue, fontWeight: FontWeight.bold))],
-              ]),
-              HoverScale(scale: 1.1, onTap: () => _showStatusSheet(item), child: Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                decoration: BoxDecoration(color: sc.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [Text(statusLabel, style: TextStyle(color: sc, fontSize: 11, fontWeight: FontWeight.bold)), const SizedBox(width: 4), Icon(Icons.edit, size: 11, color: sc)]))),
-            ]),
-          ])),
-        ]))),
-    ).animate().slideX(begin: 0.1, delay: (80 * i + 300).ms, duration: 500.ms, curve: Curves.easeOutExpo).fadeIn();
-  }
-
-  void _showActions(Complaint c) {
-    showModalBottomSheet(context: context, backgroundColor: Colors.transparent, builder: (ctx) {
-      return Container(decoration: BoxDecoration(color: AppColors.cream, borderRadius: const BorderRadius.vertical(top: Radius.circular(30))),
-        child: Padding(padding: const EdgeInsets.all(24), child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Container(width: 48, height: 6, decoration: BoxDecoration(color: AppColors.beige, borderRadius: BorderRadius.circular(10))),
-          const SizedBox(height: 20),
-          Text(c.title, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.navy)),
-          const SizedBox(height: 20),
-          HoverColorButton(baseColor: AppColors.pastelBlue, hoverColor: AppColors.navyMuted, borderRadius: BorderRadius.circular(14), onTap: () { Navigator.pop(ctx); _showStatusSheet(c); },
-            child: const SizedBox(width: double.infinity, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.edit, color: Colors.white), SizedBox(width: 8), Text('Update Status', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))]))),
-          const SizedBox(height: 10),
-          HoverColorButton(baseColor: Colors.red.shade400, hoverColor: Colors.red.shade600, borderRadius: BorderRadius.circular(14), onTap: () async {
-            Navigator.pop(ctx);
-            final confirm = await showDialog<bool>(context: context, builder: (dctx) => AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              title: Text('Delete Complaint?', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: AppColors.navy)),
-              content: const Text('This action cannot be undone.'),
-              actions: [TextButton(onPressed: () => Navigator.pop(dctx, false), child: const Text('Cancel')), ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: Colors.red), onPressed: () => Navigator.pop(dctx, true), child: const Text('Delete', style: TextStyle(color: Colors.white)))],
-            ));
-            if (confirm == true) { await _db.deleteComplaint(c.id); if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text('Complaint deleted.'), backgroundColor: Colors.red, behavior: SnackBarBehavior.floating, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)))); }
-          }, child: const SizedBox(width: double.infinity, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.delete, color: Colors.white), SizedBox(width: 8), Text('Delete Complaint', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))]))),
-          const SizedBox(height: 16),
-        ])));
-    });
-  }
-
-  void _showStatusSheet(Complaint c) {
-    showModalBottomSheet(context: context, backgroundColor: Colors.transparent, builder: (ctx) {
-      return Container(decoration: BoxDecoration(color: AppColors.cream, borderRadius: const BorderRadius.vertical(top: Radius.circular(30))),
-        child: Padding(padding: const EdgeInsets.all(24), child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Container(width: 48, height: 6, decoration: BoxDecoration(color: AppColors.beige, borderRadius: BorderRadius.circular(10))),
-          const SizedBox(height: 20),
-          Text('Update Status', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.navy)),
-          const SizedBox(height: 6), Text(c.title, style: GoogleFonts.inter(fontSize: 13, color: AppColors.textMuted), textAlign: TextAlign.center),
-          const SizedBox(height: 20),
-          _statusOpt(ctx, c, 'Submitted', Icons.fiber_new, Colors.orange),
-          _statusOpt(ctx, c, 'InProgress', Icons.autorenew, AppColors.pastelBlue),
-          _statusOpt(ctx, c, 'Resolved', Icons.check_circle, Colors.green),
-          _statusOpt(ctx, c, 'Rejected', Icons.cancel, Colors.red),
-          if (c.status == 'CancelRequested') _statusOpt(ctx, c, 'Cancelled', Icons.delete_sweep, Colors.grey),
-          const SizedBox(height: 12),
-        ]))).animate().slideY(begin: 0.5, end: 0, curve: Curves.easeOutExpo, duration: 400.ms).fadeIn();
-    });
-  }
-
-  Widget _statusOpt(BuildContext ctx, Complaint c, String status, IconData icon, Color color) {
-    final current = c.status == status;
-    return HoverColorButton(
-      baseColor: current ? color.withOpacity(0.12) : AppColors.linen,
-      hoverColor: current ? color.withOpacity(0.2) : AppColors.beigeSoft,
-      borderRadius: BorderRadius.circular(14),
-      padding: const EdgeInsets.all(14),
-      onTap: current ? null : () async { await _db.updateComplaintStatus(c.id, status); if (ctx.mounted) Navigator.pop(ctx);
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Status → $status'), backgroundColor: Colors.green, behavior: SnackBarBehavior.floating, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)))); },
-      child: Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [Icon(icon, color: color), const SizedBox(width: 12), Expanded(child: Text(status, style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.bold, color: current ? color : AppColors.navy))), if (current) Icon(Icons.check, color: color)])),
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => AdminFilteredComplaintsScreen(
+          department: dept,
+          parameter: paramName,
+          user: Provider.of<AppUser?>(context, listen: false)!,
+        )));
+      },
+      child: Container(
+        height: 76,
+        decoration: BoxDecoration(
+          color: AppColors.cream.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.beigeSoft.withOpacity(0.8)),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Row(
+            children: [
+              // Left thick stripe vertical accent
+              Container(width: 6, color: stripeColor),
+              const SizedBox(width: 18),
+              
+              // Text Content
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textMuted, letterSpacing: 0.5),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$count',
+                      style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.navy),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Circular Right Side Icon Badge
+              Container(
+                margin: const EdgeInsets.only(right: 18),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(color: badgeBgColor, shape: BoxShape.circle),
+                child: Icon(icon, color: stripeColor, size: 20),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
